@@ -56,10 +56,16 @@ corrStack_CGP( fv_start ) = 0; % fix all edge fv to 0
 corrStack_CGP( fv_end ) = 0; % fix all edge fv to 0
 interpolateFV(fv_linInd(~fv_edge)); % interpolant all non edges faulty values
 
+% Apply smoothing
+CGP_Corr_RAW = 
+CGP_Corr_FILT = 
+plotCellArr( CGP_Corr_FILT )
+plotCellArr( CGP_Corr_RAW )
+
 % Resample for smoother and sparser representation
 resampleSpikeTimes
 
-% Apply smoothing & assign values
+% assign values
 obj.acorr.CGP_Corr_RAW = mat2cell( corrStack_CGP, length(corrStack_CGP) , ones(obj.numChannels,1)' );
 obj.acorr.CGP_Corr_FILT = cellfun( @(X) smooth(X, 'sgolay',4), CGP_Corr_RAW, 'UniformOutput' ,false);
 obj.acorr.lambda_Corr_RAW = mat2cell( corrStack_L, length(corrStack_L) , ones(obj.numChannels,1)' );
