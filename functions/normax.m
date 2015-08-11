@@ -4,7 +4,7 @@ function [ output ] = normax( input )
 %   output - normalized signal
 
 if any(input)
-    output = input/max(abs(input(:)));
+    output = input/max((input(:)));
 else 
     output = input;
 end

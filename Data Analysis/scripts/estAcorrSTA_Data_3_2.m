@@ -5,13 +5,17 @@
 D = LoadDataIntoProcess( 1 ); % loads Segev's data
 process = D.Data;
 
-% define structure of assumed linear kernel
+% Define structure of assumed linear kernel
 kernNAME = 'gaussSine';           
-maxlags = ceil((2 * sqrt(2*log(10)) * 1)/process.dt); % maxlags are set according to the width of envelope 
+% maxlags = ceil((2 * sqrt(2*log(10)) * 1)/process.dt); % maxlags are set according to the width of envelope 
+maxlags = ceil((0.5 * sqrt(2*log(10)) * 1)/process.dt); % we divide by by 4 because of the high sampling rate 
 process.maxlags = maxlags;
-
 process = process.PreProcessCP( );
 PreProcessCP( NLtype ) 
+
+% Extract STA AC (the data to be fitted to)
+
+
 % define upper and lower bounderies for optimization
 constraintsLow = [eps 0 eps 0]; % [ N f sig rho]
 constraintsUpp = [Inf 100 100 2*pi];

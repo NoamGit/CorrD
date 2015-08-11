@@ -12,14 +12,14 @@ switch nargin
         varargin = importdata(filename);
         cd(currentFolder); 
        
-        % 2DO : here should come a header read but I only have Ronens data for
+        % FIX : here should come a header read but I only have Ronens data for
         % know
         signalArray = varargin;
         type = 'fileload';
         
     otherwise % default data set for Segev's data
 %         D = load('C:\Users\Noam\OneDrive - Technion\Project - CorrD\Code and toolboxes\Data\SpikeTimeGauss1B.mat');
-        D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
+        D = load('C:\Users\noambox\Documents\CorrD\SpikeTimeGauss1B.mat');
         stimRate = 30; % 30 [hz]        
         sr = 10e3; % sampling rate [hz]
         sr_new = 500; % resampling parameter [hz]

@@ -1,6 +1,6 @@
 function [ est ] = estSTA_Sim_2_2
 % [est, proc] = estSTA_Sim_2_2 This "function" simulates multiple values for the linear Kernel and checks the
-% goodness of fit to a prdefined model 
+% goodness of fit to a predefined model 
 
 % define parameter space to draw from
 space_sig = linspace(5, 10 , 200);       space_mu = linspace(0, 10, 200); 

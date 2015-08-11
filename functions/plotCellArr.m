@@ -1,4 +1,4 @@
-function [ ] = plotCellArr( y, x )
+function [ ] = plotCellArr( x, y )
 % multiplot( x, y ) plots cell array in same figure. y is the data and x is the independent
 % parameter
 

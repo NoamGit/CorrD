@@ -50,6 +50,8 @@ classdef PointProcessData < PointProcess
             % uses compute_sta to find the Spike triggered averge of the PP
             % out of the stimulus and the CP. STA duration should be
             % provided. 
+            %   STA_NUMSAMPLES - STA duration
+            %   STA_LWE - STA left window edge
             % ** note: run first PreProcessCP to obtain the CP
             
             % check exsistance of data 
