@@ -28,8 +28,8 @@ switch nargin
         spiketimes = cellfun(@(x) x .* 1/sr, {D.TT.sp},'UniformOutput',false);
         stimulusRAW = D.W(:,3); % W(:,3) matrix
         
-        % uncorrelating Segev's threshold
-        sTHRESCORR = 5.346e4; % stimulus threshold correlation
+        % uncorrelating Segev's data by taking only part of it
+        sTHRESCORR = 5.346*1e4; % from this point the stimulus becomes correlated
         stimulusUC = stimulusRAW(1:sTHRESCORR);
         stimulusUC = stimulusUC - mean(stimulusUC); % uncorrelated WGN stimulus
 

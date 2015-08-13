@@ -44,14 +44,14 @@ CP = histc(spiketimes, time);
 u=CGP/std(CGP); % normalize the linear prediction
 p=prctile(u',linspace(0,100,101)); % weighted binning of the functions domain
 p(end)=p(end)+eps;
-[N,bin]=histc(u,p); % plug values to binned domain and keep the order
+[N,bin]=histc(u,p); % plug CGP values to binned domain and keep the order
 N=N(1:end-1);
 unwant = find(bin > length(N)); % unwanted bin index
 u(unwant) = [];
 CP(unwant) = [];
 bin(unwant) = [];
-domain_bin = accumarray(bin,u,[],@mean);
-image_bin = accumarray(bin,CP,[],@mean);
+domain_bin = accumarray(bin,u,[],@mean); % the domain (X axis) of the non linearity
+image_bin = accumarray(bin,CP,[],@mean); % the image (Y axis) find how many spikes for each bin
 par = polyfit(domain_bin,image_bin,polyorder); % calculate polynomial fit
 % nl_est  = smooth(image_bin,span);
 nl_est  = polyval(par,domain_bin);
@@ -96,8 +96,8 @@ function demo1()
     GWN = 50 + 50*randn(1e6,1);
     LinKernel = normpdf((-20:30),3,10) - normpdf((-20:30),6,10);
     CGP = conv( GWN, LinKernel, 'same');
-    nl = 'exp'; % abs exp square
-    mu = 1; sig = 1;
+    nl = 'abs'; % abs exp square
+    mu = 1; sig = 3;
     switch nl
         case 'square'
             Int = (mu+sig*CGP).^2;
