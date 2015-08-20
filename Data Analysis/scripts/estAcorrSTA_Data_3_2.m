@@ -1,20 +1,25 @@
 %% estAcorrSTA_Data_3_2 
-% Here we evaluate the simulation from 2_1 on real processed data
+% comparing parametric model to real data in forward and backward
+% procedure. The comparison is done in the nl and the CGP plane
 
 % Load data
-D = LoadDataIntoProcess( 1 ); % loads Segev's data
+D = LoadDataIntoProcess( 'Segev''s Data' ); % loads Segev's data
 process = D.Data;
 
 % Define structure of assumed linear kernel
 kernNAME = 'gaussSine';           
-% maxlags = ceil((2 * sqrt(2*log(10)) * 1)/process.dt); % maxlags are set according to the width of envelope 
 maxlags = ceil((0.5 * sqrt(2*log(10)) * 1)/process.dt); % we divide by by 4 because of the high sampling rate 
 process.maxlags = maxlags;
-process = process.PreProcessCP( );
-PreProcessCP( NLtype ) 
 
-% Extract STA AC (the data to be fitted to)
+% preproccessing and calculating properties of model : CGP & lambda acorr, CGP, CP, STA
+process = process.CalcSTA('resample stimulus'); % finds the sta and upsamples the stimulus
+poly_order = 2; % order of polynum to be fit to the nl
+showFlag = 0; % compare visually acorr Lambda with the forward process in PreProcessCP
+process = process.nlestimation(poly_order, showFlag); % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
+process = process.PreProcessCP( 'estimatedNL', showFlag );
 
+% ** optional - see function description
+compare_whitening_effect_1( process );
 
 % define upper and lower bounderies for optimization
 constraintsLow = [eps 0 eps 0]; % [ N f sig rho]
@@ -28,6 +33,7 @@ process = process.CalcSTA( STA_LENGTH, 5);
 
 warning('off');
 
+%%
 %         figure(1);
 %         plot(time,targetfun(time));
 %         figure(2);plot(time,modelfun(p(1),p(2),p(3),p(4)))

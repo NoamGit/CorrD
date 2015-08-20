@@ -7,6 +7,7 @@ function [ Fs_out,spiketimes_out ] = resampleSpikeTimes( Fs, spiketimes, newrate
     
     if newrate > 500
         newrate = 500; % [hz]
+        disp('The specified rate is higher than 500 hz');
     end
     
     for n = 1:numel(spiketimes)

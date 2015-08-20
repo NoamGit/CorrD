@@ -26,40 +26,63 @@ classdef PointProcessData < PointProcess
                     obj.NlinKernel = varargin{2};
                     stimulusUC = varargin{3};
                 else 
-                    newrate = Fs;
-                    exp_model = @(mu, sig) exp( mu + sig * t);
-                    obj.NlinKernel = struct('type', 'exp', 'model', value2 ); % default kernel is exp
+%                     newrate = Fs;
+%                     exp_model = @(mu, sig) exp( mu + sig * t);
+%                     obj.NlinKernel = struct('type', 'exp', 'model', value2 ); % default kernel is exp
                 end
                 [ Fs_out,spiketimes_out ] = resampleSpikeTimes( Fs, spiketimes, newrate );
                 
                 obj.Fs = Fs_out; 
                 obj.dt = 1/Fs_out;  
                 obj.spiketimes = spiketimes_out; % is a cell array
-                obj.CP = cell(numel(spiketimes_out),1);
                 obj.stimulus = struct('Yraw', stimulus,'Yuncorr',stimulusUC,'dt', 1/stimRate);
-                obj.T = max(cellfun(@max,obj.spiketimes));
+                obj.T = length(stimulusUC)*1/stimRate; % end of stimulus
                 obj.N = ceil( obj.T * obj.Fs );  
                 obj.t = linspace(0,obj.T,obj.N);
+                obj.CP = cellfun(@(x) histc(x, obj.t), obj.spiketimes,'UniformOutput',false);
                 obj.numChannels = numel(spiketimes);
-                obj.acorr = struct('CGP_Corr_RAW', [],'lambda_Corr_RAW', [],'CGP_Corr_FILT', [],'lambda_Corr_FILT', []);
+                obj.acorr = struct('lags',[],'CGP_Corr_RAW', [],'lambda_Corr_RAW', [],'CGP_Corr_FILT', [],'lambda_Corr_FILT', []);
             end
         end
         
         %% Calculate STA of process
-        function obj = CalcSTA( obj, STA_NUMSAMPLES, STA_LWE )
+        function obj = CalcSTA( obj, varargin )
             % uses compute_sta to find the Spike triggered averge of the PP
             % out of the stimulus and the CP. STA duration should be
-            % provided. 
-            %   STA_NUMSAMPLES - STA duration
-            %   STA_LWE - STA left window edge
+            % provided. We also upsample the stimulus in case it has
+            % different SR from the CP.
+            %   varg{1} STA_NUMSAMPLES - STA duration
+            %   varg{2} STA_LWE - STA left window edge
+            %   varg{3} resampleFlag - flag for resampling the stimulus to the sp
+            %                   resolution
             % ** note: run first PreProcessCP to obtain the CP
             
             % check exsistance of data 
             assert(~isempty(obj.stimulus), '     no CP or stimulus loaded for the process')
             
-            if nargin < 2
+            resampleFlag = any(strcmp(varargin,'resample stimulus'));
+            if resampleFlag; numArg = nargin-1;else numArg = nargin; end;
+            
+            if numArg < 2
                 STA_NUMSAMPLES = 35 ; % [ms] default STA of 35 samples 
                 STA_LWE = 5;
+            else
+                STA_NUMSAMPLES = varargin{1};
+                STA_LWE = varargin{2};
+            end
+            
+            % resample if flagged
+            if resampleFlag
+                upsamplingFactor = obj.Fs/(1/obj.stimulus.dt); % must be  
+                assert( ~rem(obj.Fs,(1/obj.stimulus.dt)) ,...
+                    '  resampling failed. The F of stim and process have non zero remainder');
+                
+                obj.stimulus.Yuncorr = obj.stimulus.Yuncorr(1:ceil(obj.t(end)/obj.stimulus.dt)); % prunning only to stimulus in the time axis
+                upsampledStim = repmat(obj.stimulus.Yuncorr',[upsamplingFactor 1]);
+                obj.stimulus.Yuncorr = upsampledStim(:);
+                obj.stimulus.dt = obj.dt;
+                STA_NUMSAMPLES = STA_NUMSAMPLES * upsamplingFactor;
+                STA_LWE = STA_LWE * upsamplingFactor;
             end
             
             % use compute sta func to evalate STA
@@ -78,6 +101,9 @@ classdef PointProcessData < PointProcess
         
         %% find PP correlation
         [lambda_corr] = ppcorr(obj, bias, correctR0, method)
+        
+        %% estimate non linearity
+        obj = nlestimation( obj, varargin );
     end
     
 end

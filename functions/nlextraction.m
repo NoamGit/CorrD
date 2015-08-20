@@ -16,10 +16,13 @@ function [ varargout ] = nlextraction( CGP, spiketimes, dt, time, span, polyorde
 % 
 %         author: Noam Cohen,2014
 
+% test with simple examples
 if nargin == 0
     demo1();
     return;
 end
+
+% input validation
 if nonzeros(spiketimes < 0)
     spiketimes = spiketimes(spiketimes >= 0);
     fprintf('some spiketimes are before 0\n');

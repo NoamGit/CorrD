@@ -1,3 +1,9 @@
+%% test mannually changing the nl
+% here we play nwith the nl in the CGP plane by modifying it to a log +
+% probit function
+
+%% Probit function example
+
 X = (0:1e-3:2);
 m1 = 0.3; s1 = 0.2; n1 = 1;
 Y1 = n1 .* normcdf(X, m1,s1);
@@ -6,8 +12,8 @@ Y2 = n2.*exp(m2+s2.*X);
 m3 = 1.5 ;s3 = 0.1; n3 = 7;
 Y3 = n3 .* normcdf(X, m3,s3);
 plot(X,Y1+Y3,'--d',X,Y1,'k',X,Y2,'--r',X,Y3,'m');
+%% data comparison with probit function
 
-%%
 raw_corr_comparison;
 
 pnum = 19; % process num
