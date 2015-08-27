@@ -61,7 +61,7 @@ classdef PointProcessData < PointProcess
             assert(~isempty(obj.stimulus), '     no CP or stimulus loaded for the process')
             
             resampleFlag = any(strcmp(varargin,'resample stimulus'));
-            if resampleFlag; numArg = nargin-1;else numArg = nargin; end;
+            numArg = nargin-1;
             
             if numArg < 2
                 STA_NUMSAMPLES = 35 ; % [ms] default STA of 35 samples 

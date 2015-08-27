@@ -1,5 +1,6 @@
 function [ ] = compare_whitening_effect_1( obj )
-% this function visually compares the derived lambdaCorr_forw from
+% this function visually the correlation of lambda in the forward and
+% back procedure
 % PreProcess to the analytical model derived in "the whitening effect in
 % the nl plane.doc"
 
@@ -26,7 +27,7 @@ for k = 1:obj.numChannels
     % interpolation to mutual sampling rate
     sampPoints =  lags .* obj.stimulus.dt;
     queryPoints = linspace(sampPoints(1),sampPoints(end),...
-        length(sampPoints) * resampFactor);
+        2*obj.maxlags + 1);
     E_x_ttau_intrp = interp1( sampPoints, E_x_ttau ,queryPoints, 'spline' );
     var_xk_est = E_x_ttau_intrp(obj.maxlags+1) - E_xk_est.^2; 
     

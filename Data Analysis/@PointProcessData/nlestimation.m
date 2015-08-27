@@ -7,18 +7,32 @@ function obj = nlestimation( obj,varargin )
 
 showFlag = 0;
 polyorder = 0;
+resampleFlag = 0;
 if nargin > 0
     polyorder = varargin{1};
     showFlag = varargin{2};
+    resampleFlag = any(strcmp(varargin,'resample stimulus')); 
 end
 
 CP = obj.CP;
 nl_est = cell(obj.numChannels,2);
 [ image_bin, nl_bin ] = deal( cell(obj.numChannels,1) );
 for k = 1:obj.numChannels
-
-        obj.CGP{k} = conv( obj.stimulus.Yuncorr(1:length(obj.CP{k})), obj.STA(k).realSTA, 'same');
-
+        if ~resampleFlag % if stimulus was not resampled interpolate CGP
+            stim = [obj.stimulus.Yuncorr;  obj.stimulus.Yraw(length(obj.stimulus.Yuncorr)+1)-mean(obj.stimulus.Yraw)];
+            sampVal = conv( stim, obj.STA(k).realSTA, 'same');
+            sampPoints =  (0:obj.stimulus.dt:obj.T);
+            queryPoints = (0:obj.dt:obj.T);
+            CGP = interp1( sampPoints, sampVal ,queryPoints, 'spline' );
+            obj.CGP{k} = CGP(1:end-1)'; % removing interp bias
+            CP = obj.CP;
+        else % everything is already resampled
+            obj.CGP{k} = conv( obj.stimulus.Yuncorr, obj.STA(k).realSTA, 'same');
+%             time =  (0:obj.stimulus.dt:obj.T-obj.stimulus.dt); % this can
+%             be used for no interp nor resampling nl estimation
+%             CP{k} =  histc(obj.spiketimes{k}, time);
+        end
+        
         % normalize the linear prediction and weighted binning of the functions domain
         u = obj.CGP{k}/std(obj.CGP{k}); 
         p = prctile(u',linspace(0,100,101)); 

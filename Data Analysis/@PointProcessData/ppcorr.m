@@ -66,7 +66,7 @@ for iCell=1:nCells
             obj.maxlags=length(counts1);
         end
         lambda_corr{iCell, jCell}=xcorr(counts1, counts2, obj.maxlags, bias)/obj.dt^2;
-        %using symmetry to save computations
+        % using symmetry to save computations
         lambda_corr{jCell, iCell}=flipud(lambda_corr{iCell, jCell});
     end
 end
