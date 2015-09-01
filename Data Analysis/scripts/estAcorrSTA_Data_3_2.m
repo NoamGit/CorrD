@@ -22,12 +22,21 @@
     % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 
     % 10 11 13 14 17 18 21 22 23)
     process = process.nlestimation(poly_order, showFlag, 'original stimulus'); 
-    % process = process.CalcSTA('resample stimulus'); % finds the sta and upsamples the stimulus
-    % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
-    process = process.PreProcessCP( 'estimatedNL', showFlag );
+        % process = process.CalcSTA('resample stimulus'); % finds the sta and upsamples the stimulus
+        % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
+    process = process.PreProcessCP( 'estimatedNL', 0 );
 
 % ** optional - see function description
-compare_whitening_effect_1( process );
+% result - decent results in cell 4 5 7 8 15 20 23
+%          not so great results 3 6 11 13
+compareInNlPlane( process );
+
+% ** optional - see func description
+% result - good statistical prop in cell 1 2 4 5 7 8 9 14 15 20 21 22  
+showISI( process );
+
+% ** optional - 
+burstDetection( process );
 
 % define upper and lower bounderies for optimization
 constraintsLow = [eps 0 eps 0]; % [ N f sig rho]

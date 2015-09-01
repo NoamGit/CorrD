@@ -104,6 +104,10 @@ classdef PointProcessData < PointProcess
         
         %% estimate non linearity
         obj = nlestimation( obj, varargin );
+        
+        %% show spike time interval histogram and exponential fit
+        showISI( obj, varargin ); 
+        
     end
     
 end

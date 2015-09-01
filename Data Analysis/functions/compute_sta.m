@@ -21,6 +21,8 @@ function [ sta ] = compute_sta( stimulus, spiketimes, numSAMPLES, sta_lwe , dt_S
     % simple spike-triggered average computation of the spikes found using the find command.
     sta_x = arrayfun(@(x) linspace( x-(numSAMPLES-sta_lwe-1), x + sta_lwe, numSAMPLES ), spike_SAMPLES_rel,'UniformOutput',false);
     spikesArrays = cellfun(@(x) stimulus(x),sta_x,'UniformOutput',false);        
-    sta = mean(cell2mat(spikesArrays'),2);
+%     sta = mean(cell2mat(spikesArrays'),2);
+    sta = -mean(cell2mat(spikesArrays'),2); % the linear kernel should have a negative sign (?ASK SHY?)
+
 end
 
