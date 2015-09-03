@@ -9,6 +9,7 @@ classdef PointProcessData < PointProcess
         % features
         CP % Couting process from spiketimes
         STA % real and estimated STA
+        recoveryFunc % recovery probability after refact
     end
     
     methods

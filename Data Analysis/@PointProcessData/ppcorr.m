@@ -7,18 +7,18 @@ function [ lambda_corr ] = ppcorr(obj, bias, correctR0 , method)
 % maxlags - maxlags (as in xcorr) - full length if not specified
 % bias - bias flag (as in xcorr, on of: {'none', 'biased', ['unbiased']})
 % correctR0 - flag whether to remove a 'delta' at Rxx(tau=0)
-% (1 - remove, 0 - don't remove). Default set to 0.
+% (1 - correct (MGF), 2 - remove, 0 - don't remove). Default set to 0.
 
 % check the input apply defaults
-if nargin<3
+if nargin<2
     obj.maxlags=[];
 end
 
-if nargin<4
+if nargin<3
     bias='unbiased';
 end
 
-if nargin<5
+if nargin<4
     correctR0=0;
 end
 
@@ -45,14 +45,18 @@ for iCell=1:nCells
     end
     lambda_corr{iCell, iCell}=xcorr(counts1, obj.maxlags, bias)/obj.dt^2;
 
-    % remove delta at tau==0
-    if correctR0
+    % correct delta at tau==0
+    if correctR0 == 1
+        % this implementation is using the moment generating function
         zerolag=(length(lambda_corr{iCell, iCell})+1)/2;
         E=ppmean(obj.spiketimes{iCell});
-        lambda_corr{iCell, iCell}(zerolag)=lambda_corr{iCell, iCell}(zerolag)-E/obj.dt; % this implementation is using the moment generating function
+        lambda_corr{iCell, iCell}(zerolag)=lambda_corr{iCell, iCell}(zerolag)-E/obj.dt; 
+    elseif correctR0 == 2
+        zerolag=(length(lambda_corr{iCell, iCell})+1)/2;
+        lambda_corr{iCell, iCell}(zerolag)=[]; 
     end
     
-    if vFlag % calculates only AC if flag is up
+    if vFlag % calculates only AC (not Cross-Corr) if flag is up
         lambda_Acorr{iCell} = lambda_corr{iCell, iCell};
         continue;
     end

@@ -12,10 +12,11 @@
     maxlags = ceil((0.621 * sqrt(2*log(10)) * 1)/process.dt); 
     process.maxlags = maxlags;
 
-% preproccessing and calculating properties of model : CGP & lambda acorr, CGP, CP, STA
+% preproccessing and calculating properties of model : CGP & lambda acorr,
+% CGP, CP, STA ,nl
     % order of polynum to be fit to the nl
     poly_order = 2;
-     % compare visually acorr Lambda with the forward process in PreProcessCP
+    % compare visually acorr Lambda with the forward process in PreProcessCP
     showFlag = 0;
     % finds the sta and potentially upsamples the stimulus
     process = process.CalcSTA('original stimulus'); 
@@ -23,20 +24,24 @@
     % 10 11 13 14 17 18 21 22 23)
     process = process.nlestimation(poly_order, showFlag, 'original stimulus'); 
         % process = process.CalcSTA('resample stimulus'); % finds the sta and upsamples the stimulus
-        % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
-    process = process.PreProcessCP( 'estimatedNL', 0 );
+        % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); 
+        % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
+    flagDoublet = 1; flagCompare = 0; % Cancel Doublet = 1 Compare = 1
+    process = process.PreProcessCP( 'estimatedNL', flagDoublet, flagCompare );
+%% Visualize pre processed data
 
 % ** optional - see function description
 % result - decent results in cell 4 5 7 8 15 20 23
 %          not so great results 3 6 11 13
-compareInNlPlane( process );
+    compareInNlPlane( process );
 
 % ** optional - see func description
 % result - good statistical prop in cell 1 2 4 5 7 8 9 14 15 20 21 22  
-showISI( process );
+    showISI( process );
 
 % ** optional - 
-burstDetection( process );
+    burstDetection( process );
+%% Data fitting and optimization
 
 % define upper and lower bounderies for optimization
 constraintsLow = [eps 0 eps 0]; % [ N f sig rho]

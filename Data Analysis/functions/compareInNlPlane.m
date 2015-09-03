@@ -9,7 +9,7 @@ h = {obj.STA.realSTA};
 x = obj.CGP;
 theta = {obj.NlinKernel.estimation.polyfit};
 R_lambd_b = obj.acorr.lambda_Corr_RAW;
-R_lambd_f = cell(numel(R_lambd_b),1);
+[ R_lambd_f,R_lambd_b_BIN ] = deal(cell(numel(R_lambd_b),1));
 
 % for each process compare
 for k = 1:obj.numChannels
@@ -44,6 +44,19 @@ for k = 1:obj.numChannels
     timeaxis = obj.acorr.lags;
     timeaxis(zeroLag_index) = [];
     
+    % binn for more poissonian like behaviour
+    binSize = 0.01; % possible values - 0.01 ~ 100 Hz 0.03
+    numBins = ceil(obj.maxlags*(obj.dt/binSize)); % define number of bins
+    binEdges = linspace( timeaxis(zeroLag_index), timeaxis(end),numBins);
+    [~,whichBin] = histc(timeaxis(zeroLag_index:end), binEdges);
+    R_right_side = R_lambd_b{k}(zeroLag_index:end);
+    for n = 1:numBins
+        flagBinMembers = (whichBin == n);
+        binMembers     = R_right_side(flagBinMembers);
+        R_BIN(n)     = mean(binMembers);
+    end
+    R_lambd_b_BIN{k} = interp1( [-fliplr(binEdges) binEdges], [fliplr(R_BIN) R_BIN] ,timeaxis, 'spline' );
+    
 %     R_lambd_f{k} = xcorr( polyval(obj.NlinKernel.estimation(k).polyfit,...
 %     xk), obj.maxlags,'unbiased'); % this is the crude numerical acorr
 %     with original h and s
@@ -51,6 +64,13 @@ end
 
 % compare visually
 normMethod = 6; 
-plotCompare( R_lambd_b, R_lambd_f, timeaxis, 6, 'cell', normMethod, (1:24));
- 
+plotsPerFig = 6;
+cellstoshow = ceil(obj.numChannels/6);
+plotCompare( R_lambd_b, R_lambd_f, timeaxis, 6, 'cell', normMethod, (1:cellstoshow*plotsPerFig));
+
+% for figure in onenote
+% plotCompare( R_lambd_b, R_lambd_f, timeaxis, 4, 'cell', 6, [4 5 7 8 15 20 21 23]); % figure 1
+% plotCompare( R_lambd_b_BIN, R_lambd_f, timeaxis, 4, 'cell', 6, [4 5 7 8 15 20 21 23]); % figure 4
+% plotCompare( R_lambd_b, R_lambd_f, timeaxis, 4, 'cell', 6, [4 5 7 8 15 20 21 23]); % figure 5
+
 end

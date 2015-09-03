@@ -16,7 +16,7 @@ end
 
 CP = obj.CP;
 nl_est = cell(obj.numChannels,2);
-[ image_bin, nl_bin ] = deal( cell(obj.numChannels,1) );
+[ image_bin, nl_bin, param ] = deal( cell(obj.numChannels,1) );
 for k = 1:obj.numChannels
         if ~resampleFlag % if stimulus was not resampled interpolate CGP
             stim = [obj.stimulus.Yuncorr;  obj.stimulus.Yraw(length(obj.stimulus.Yuncorr)+1)-mean(obj.stimulus.Yraw)];
@@ -50,13 +50,13 @@ for k = 1:obj.numChannels
         
         domain_bin = accumarray(bin,u,[],@mean); % the domain (X axis) of the non linearity
         image_bin{k} = accumarray(bin,CP{k},[],@mean); % the image (Y axis) find how many spikes for each bin
-        param = polyfit(domain_bin,image_bin{k},polyorder); % calculate polynomial fit
+        param{k} = polyfit(domain_bin,image_bin{k},polyorder); % calculate polynomial fit
         nl_est{k,1} = domain_bin;
-        nl_est{k,2} = polyval(param,domain_bin);
+        nl_est{k,2} = polyval(param{k},domain_bin);
         nl_bin{k} = bin;
 end
 
-obj.NlinKernel.estimation = struct('domain',nl_est(:,1),'image',nl_est(:,2),'bin', nl_bin,'polyfit',param);
+obj.NlinKernel.estimation = struct('domain',nl_est(:,1),'image',nl_est(:,2),'bin', nl_bin,'polyfit',param(:));
 
 if showFlag
 num2disp = 4;

@@ -2,25 +2,32 @@ function [ ] = plotCompare(cellarray1, varargin)
 % vizualizes graphically 2 cell arrays
 % input: num2disp number of plots to display in a figure
 % for normalization method (varargin{5}) see normalize.m
-if nargin>1
+
+timeaxis = (1:length(cellarray1{1}));
+num2disp = 4;
+title_arg = 'No title';
+method = 0;
+cellIndx = (1:num2disp * ceil(numel(cellarray1)/num2disp));
+
+if nargin == 2
+    timeaxis = varargin{1};
+elseif nargin == 3
+    timeaxis = varargin{1};
+    cellIndx = varargin{2};
+elseif nargin > 2
     cellarray2 = varargin{1};
     timeaxis = varargin{2};
     num2disp = varargin{3};
     title_arg = varargin{4};
     method = varargin{5};
     cellIndx = varargin{6};
-else
-    timeaxis = (1:length(cellarray1{1}));
-    num2disp = 4;
-    title_arg = 'No title';
-    method = 0;
-    cellIndx = (1:numel(cellarray1));
 end
 
 [fact] = factor(num2disp);
 x = prod(fact(1:ceil(length(fact)/2))); y =  prod(fact(ceil(length(fact)/2)+1:end));
 numFigures = ceil(numel( cellIndx )/num2disp);   
 for k = 1:numFigures
+%     figure();
     figure(k);
     for n = 1:num2disp
         try
@@ -40,7 +47,7 @@ for k = 1:numFigures
                     plot(timeaxis, normalize(cellarray1{dataNum},method));
                     title(s(n),[title_arg,' ',num2str(dataNum)]);
                 else
-                    plot(timeaxis, cellarray1{dataNum},'--');
+                    plot(timeaxis, cellarray1{dataNum});
                     title(s(n),[title_arg,' ',num2str(dataNum)]);
                  end
             end
@@ -48,7 +55,7 @@ for k = 1:numFigures
         catch err
             break;
         end
-        axis([-1 1 -Inf Inf]);
+        axis([-.5 .5 -Inf Inf]);
 %         axis([timeaxis(1) timeaxis(end) -inf inf]);
 %         title(s(n),[title,' ',num2str(dataNum)]); 
         xlabel('\tau [sec]');ylabel('corr');
