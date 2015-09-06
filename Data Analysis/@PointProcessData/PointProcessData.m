@@ -31,7 +31,12 @@ classdef PointProcessData < PointProcess
 %                     exp_model = @(mu, sig) exp( mu + sig * t);
 %                     obj.NlinKernel = struct('type', 'exp', 'model', value2 ); % default kernel is exp
                 end
-                [ Fs_out,spiketimes_out ] = resampleSpikeTimes( Fs, spiketimes, newrate );
+                
+                spiketimes_out = spiketimes;
+                Fs_out = Fs;
+                if ~isempty(newrate)
+                    [ Fs_out,spiketimes_out ] = resampleSpikeTimes( Fs, spiketimes, newrate );
+                end
                 
                 obj.Fs = Fs_out; 
                 obj.dt = 1/Fs_out;  
@@ -86,7 +91,7 @@ classdef PointProcessData < PointProcess
                 STA_LWE = STA_LWE * upsamplingFactor;
             end
             
-            % use compute sta func to evalate STA
+            % use compute sta func t o evalate STA
             if iscell(obj.spiketimes) % multi process
                 [ sta ] = cellfun(@(ST) compute_sta( obj.stimulus.Yuncorr, ST, STA_NUMSAMPLES, STA_LWE, obj.stimulus.dt)...
                     ,obj.spiketimes,'UniformOutput',false);
