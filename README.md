@@ -1,2 +1,3 @@
 # CorrD
-Correlation distortion project
+Correlation distortion/Kernel estimation project
+pre-alpha version
