@@ -8,17 +8,25 @@ function obj = nlestimation( obj,varargin )
 showFlag = 0;
 polyorder = 0;
 resampleFlag = 0;
-if nargin > 0
+amp = 1;
+syntDataFlag = 0;
+if nargin == 3
     polyorder = varargin{1};
     showFlag = varargin{2};
-    resampleFlag = any(strcmp(varargin,'resample stimulus')); 
+    resampleFlag = any(strcmp(varargin,'resampled stimulus')); 
+elseif nargin > 3
+    polyorder = varargin{1};
+    showFlag = varargin{2};
+    amp = varargin{3};
+    syntDataFlag = any(strcmp(varargin,'Synt Data'));
+    resampleFlag = any(strcmp(varargin,'resampled stimulus'));
 end
 
 CP = obj.CP;
 nl_est = cell(obj.numChannels,2);
 [ image_bin, nl_bin, param ] = deal( cell(obj.numChannels,1) );
 for k = 1:obj.numChannels
-        if ~resampleFlag % if stimulus was not resampled interpolate CGP
+        if ~resampleFlag && ~syntDataFlag % if stimulus was not resampled and not syntetic data -> interpolate CGP 
             stim = [obj.stimulus.Yuncorr;  obj.stimulus.Yraw(length(obj.stimulus.Yuncorr)+1)-mean(obj.stimulus.Yraw)];
             sampVal = conv( stim, obj.STA(k).realSTA, 'same');
             sampPoints =  (0:obj.stimulus.dt:obj.T);
@@ -26,11 +34,11 @@ for k = 1:obj.numChannels
             CGP = interp1( sampPoints, sampVal ,queryPoints, 'spline' );
             obj.CGP{k} = CGP(1:end-1)'; % removing interp bias
             CP = obj.CP;
-        else % everything is already resampled
-            obj.CGP{k} = conv( obj.stimulus.Yuncorr, obj.STA(k).realSTA, 'same');
+        elseif resampleFlag && ~syntDataFlag % everything is already resampled and not syntetic data
+            obj.CGP{k} =  conv( obj.stimulus.Yuncorr, amp * obj.STA(k).realSTA, 'same');
 %             time =  (0:obj.stimulus.dt:obj.T-obj.stimulus.dt); % this can
 %             be used for no interp nor resampling nl estimation
-%             CP{k} =  histc(obj.spiketimes{k}, time);
+%             CP{k} =  histc(obj.spiketimes{k}, time);            
         end
         
         % normalize the linear prediction and weighted binning of the functions domain
@@ -54,12 +62,14 @@ for k = 1:obj.numChannels
         nl_est{k,1} = domain_bin;
         nl_est{k,2} = polyval(param{k},domain_bin);
         nl_bin{k} = bin;
+        
+        % CAUTION - might not work with real (not synt) data
+        obj.NlinKernel(k).estimation = struct('domain',nl_est(k,1),'image',nl_est(k,2),'bin', nl_bin(k),'polyfit',param(k));
 end
 
-obj.NlinKernel.estimation = struct('domain',nl_est(:,1),'image',nl_est(:,2),'bin', nl_bin,'polyfit',param(:));
 
 if showFlag
-num2disp = 4;
+num2disp = 10;
 [fact] = factor(num2disp);
 x = prod(fact(1:ceil(length(fact)/2))); y =  prod(fact(ceil(length(fact)/2)+1:end));
 numFigures = ceil(obj.numChannels/num2disp);

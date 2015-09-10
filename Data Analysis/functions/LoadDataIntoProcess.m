@@ -4,8 +4,8 @@ function [ out ] = LoadDataIntoProcess( varargin )
 %   Detailed explanation goes here
 
 % handle different kind of inputs
-switch nargin
-    case 0 
+switch varargin{1}
+    case '' 
         [ filename, pathname ] = uigetfile('*.mat', 'Select m-fil data');
         currentFolder = pwd;
         cd(pathname);
@@ -16,6 +16,20 @@ switch nargin
         % know
         signalArray = varargin;
         type = 'fileload';
+        out = struct('type', type, 'Data',signalArray);
+        
+    case 'synt'
+        % self generated data
+        dt_stim = varargin{2}; 
+        samplingRate = 1/dt_stim; % [hz]
+        modelfunc = cellfun(@(x) x.model,{varargin{3}.nonlinKernel},'UniformOutput',false);
+        model_nl = struct('type', 'estimated', 'model', modelfunc,'estimation',[] ); % default kernel is exp
+        spiketimes = {varargin{3}.spiketimes}; % only first 900 sec are used for this experiment
+        stimulusUC = varargin{4}; % W(:,3) matrix
+        
+        % build object
+        signalArray = PointProcessData( samplingRate, spiketimes,samplingRate, [], [], model_nl, stimulusUC);
+        out = signalArray;
         
     otherwise % default data set for Segev's data
         % recall that in practice we are running 15 trails of 60 sec
@@ -42,7 +56,7 @@ switch nargin
         % build object
         signalArray = PointProcessData( sr, spiketimes,stimRate, stimulusRAW, sr_new, exp_model, stimulusUC);
         type = 'Segev';
-end
         out = struct('type', type, 'Data',signalArray);
+end
 end
 
