@@ -23,6 +23,11 @@ elseif nargin > 2
     cellIndx = varargin{6};
 end
 
+if ~iscell(timeaxis)
+    timeRepMat = repmat(timeaxis,numel(cellarray1),1);
+    timeaxis = mat2cell(timeRepMat, ones(numel(cellarray1),1),size(timeaxis,2));
+end
+
 [fact] = factor(num2disp);
 x = prod(fact(1:ceil(length(fact)/2))); y =  prod(fact(ceil(length(fact)/2)+1:end));
 numFigures = ceil(numel( cellIndx )/num2disp);   
@@ -35,19 +40,19 @@ for k = 1:numFigures
             s(n) = subplot(x,y,n);
             if exist('cellarray2','var') % plot - 2 signals to compare
                 if method
-                plot(timeaxis, normalize(cellarray1{dataNum},method)...
-                    , timeaxis, normalize(cellarray2{dataNum},method),'r');
+                plot(timeaxis{dataNum}, normalize(cellarray1{dataNum},method)...
+                    , timeaxis{dataNum}, normalize(cellarray2{dataNum},method),'r');
                 title(s(n),[title_arg,' ',num2str(dataNum)]);
                 else
-                    plot(timeaxis, cellarray1{dataNum},'--', timeaxis, cellarray2{dataNum},'r');
+                    plot(timeaxis{dataNum}, cellarray1{dataNum},'--', timeaxis{dataNum}, cellarray2{dataNum},'r');
                     title(s(n),[title_arg,' ',num2str(dataNum)]);
                 end
             else % plot - only one signal 
                  if method
-                    plot(timeaxis, normalize(cellarray1{dataNum},method));
+                    plot(timeaxis{dataNum}, normalize(cellarray1{dataNum},method));
                     title(s(n),[title_arg,' ',num2str(dataNum)]);
                 else
-                    plot(timeaxis, cellarray1{dataNum});
+                    plot(timeaxis{dataNum}, cellarray1{dataNum});
                     title(s(n),[title_arg,' ',num2str(dataNum)]);
                  end
             end
@@ -55,10 +60,10 @@ for k = 1:numFigures
         catch err
             break;
         end
-        axis([-.5 .5 -Inf Inf]);
-%         axis([timeaxis(1) timeaxis(end) -inf inf]);
+%         axis([-.5 .5 -Inf Inf]);
+        axis([timeaxis{dataNum}(1) timeaxis{dataNum}(end) -inf inf]);
 %         title(s(n),[title,' ',num2str(dataNum)]); 
-        xlabel('\tau [sec]');ylabel('corr');
+        xlabel('t [sec]');ylabel('STA standartized');
     end
 %     legend('CGP corr','STA corr');
 %     legend('R_{dN}{(\tau)}','R_{\lambda}{(\tau)}')

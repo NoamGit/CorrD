@@ -22,8 +22,9 @@
     process = process.CalcSTA('original stimulus'); 
     % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 
     % 10 11 13 14 17 18 21 22 23)
-    process = process.nlestimation(poly_order, showFlag, 'original stimulus'); 
-        % process = process.CalcSTA('resample stimulus'); % finds the sta and upsamples the stimulus
+    amp = 1;
+    process = process.nlestimation(poly_order, showFlag, amp, 'original stimulus'); 
+        % process = process.CalcSTA('resampled stimulus'); % finds the sta and upsamples the stimulus
         % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); 
         % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
     flagDoublet = 1; flagCompare = 0; % Cancel Doublet = 1 Compare = 1

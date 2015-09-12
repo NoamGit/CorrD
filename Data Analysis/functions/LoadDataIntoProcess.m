@@ -15,6 +15,7 @@ switch varargin{1}
         % 2DO : here should come a header read but I only have Ronens data for
         % know
         signalArray = varargin;
+<<<<<<< HEAD
         type = 'fileload'; 
         out = struct('type', type, 'Data',signalArray);
         
@@ -30,6 +31,22 @@ switch varargin{1}
         
         % build object
         signalArray = PointProcessData( sr, spiketimes,stimRate, [], [], exp_model, stimulus);
+=======
+        type = 'fileload';
+        out = struct('type', type, 'Data',signalArray);
+        
+    case 'synt'
+        % self generated data
+        dt_stim = varargin{2}; 
+        samplingRate = 1/dt_stim; % [hz]
+        modelfunc = cellfun(@(x) x.model,{varargin{3}.nonlinKernel},'UniformOutput',false);
+        model_nl = struct('type', 'estimated', 'model', modelfunc,'estimation',[] ); % default kernel is exp
+        spiketimes = {varargin{3}.spiketimes}; % only first 900 sec are used for this experiment
+        stimulusUC = varargin{4}; % W(:,3) matrix
+        
+        % build object
+        signalArray = PointProcessData( samplingRate, spiketimes,samplingRate, [], [], model_nl, stimulusUC);
+>>>>>>> 73cf82f0f8fd96f48f33e081e81811f4e357c326
         out = signalArray;
         
     otherwise % default data set for Segev's data
