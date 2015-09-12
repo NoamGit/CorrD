@@ -4,8 +4,8 @@ function [ out ] = LoadDataIntoProcess( varargin )
 %   Detailed explanation goes here
 
 % handle different kind of inputs
-switch nargin
-    case 0 
+switch varargin{1}
+    case '' 
         [ filename, pathname ] = uigetfile('*.mat', 'Select m-fil data');
         currentFolder = pwd;
         cd(pathname);
@@ -15,7 +15,22 @@ switch nargin
         % 2DO : here should come a header read but I only have Ronens data for
         % know
         signalArray = varargin;
-        type = 'fileload';
+        type = 'fileload'; 
+        out = struct('type', type, 'Data',signalArray);
+        
+    case 'synt'
+        % load synthesized data
+        [ sr, stimRate ] = deal(1/varargin{2});      
+        modelfunc = varargin{3}(1).nonlinKernel.model;
+        nl_DATA = {varargin{3}.nonlinKernel};
+        exp_model = struct('type', '2 degree poly',...
+            'model', modelfunc,'estimation',[],'original', nl_DATA); % default kernel is exp
+        spiketimes = {varargin{3}.spiketimes};
+        stimulus = varargin{4};
+        
+        % build object
+        signalArray = PointProcessData( sr, spiketimes,stimRate, [], [], exp_model, stimulus);
+        out = signalArray;
         
     otherwise % default data set for Segev's data
         % recall that in practice we are running 15 trails of 60 sec
@@ -23,8 +38,8 @@ switch nargin
         % D.W(:,1) probabily indicates on times that the stimulus is "refreshed"
         % so it might be a an empty gap 
         
-%         D = load('C:\Users\Noam\OneDrive - Technion\Project - CorrD\Code and toolboxes\Data\SpikeTimeGauss1B.mat');
-        D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
+        D = load('C:\Users\Noam\Documents\GitHub\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat');
+%         D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
         stimRate = 30; % 30 [hz]        
         sr = 10e3; % sampling rate [hz]
         sr_new = 450; % resampling parameter [hz] rem( 480 , 30) = 0 ;
@@ -42,7 +57,7 @@ switch nargin
         % build object
         signalArray = PointProcessData( sr, spiketimes,stimRate, stimulusRAW, sr_new, exp_model, stimulusUC);
         type = 'Segev';
-end
         out = struct('type', type, 'Data',signalArray);
+end
 end
 
