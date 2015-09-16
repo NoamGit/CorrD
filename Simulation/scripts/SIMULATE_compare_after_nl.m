@@ -10,7 +10,7 @@ noiseMean = 0;
 stim = noiseMean + noiseVar * randn(N,1);
 t_stim = linspace(0,N*dt_stim,N);
 
-c = 10;
+c = 4;
 syntData = [];
 %% create all processes
 for n = 1:c % build c processes
@@ -42,7 +42,9 @@ for n = 1:c % build c processes
     %% create CGP, lambda and spiketimes
     
     amp = 1e3;
-    CGP = conv( stim,amp * model_kernel(fliplr(t_kernel)),'full');
+%     CGP = conv( stim,amp * model_kernel(fliplr(t_kernel)),'full');
+    CGP = conv( stim,amp * model_kernel(t_kernel),'full');
+
     lambda = model_nl(CGP); 
     spiketimes = simpp( lambda , dt_stim);
     
@@ -73,7 +75,6 @@ end
     
     % Load data to PointProcessData structure
     process = LoadDataIntoProcess( 'synt', dt_stim, syntData, stim );
-    kernNAME = 'gaussSine';
     maxlags = ceil((10 * sqrt(2*log(10)) * max(space_sig))/process.dt); 
     process.maxlags = maxlags;
     % Part 2 - test custom made functions
@@ -86,7 +87,8 @@ end
     legend('STA','Kernel');
     %% try nlestimation
     
-    process.CGP = cellfun(@(x) conv( stim,amp * x.model(fliplr(t_kernel)),'same'),{syntData.linKernel},'UniformOutput',false);
+    cgp_cellArray = cellfun(@(x) conv( stim,amp * x.model(fliplr(t_kernel)),'full'),{syntData.linKernel},'UniformOutput',false);
+    process.CGP = cellfun(@(x) x(1:end - length(t_kernel)+1) ,cgp_cellArray,'UniformOutput',false);
     process.CP = arrayfun(@(x) histc(process.spiketimes{x}, t_stim),(1:c),'UniformOutput',false);
     poly_order = 2;
     process = process.nlestimation(poly_order, 0, amp, 'resampled stimulus','Synt Data'); % stimulus has same dt as procees -> resampled

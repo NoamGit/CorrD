@@ -28,14 +28,16 @@ nl_est = cell(obj.numChannels,2);
 for k = 1:obj.numChannels
         if ~resampleFlag && ~syntDataFlag % if stimulus was not resampled and not syntetic data -> interpolate CGP 
             stim = [obj.stimulus.Yuncorr;  obj.stimulus.Yraw(length(obj.stimulus.Yuncorr)+1)-mean(obj.stimulus.Yraw)];
-            sampVal = conv( stim, obj.STA(k).realSTA, 'same');
+            sampVal = conv( stim, obj.STA(k).realSTA, 'full');
+            sampVal = sampVal(1:end-length(obj.STA(k).realSTA)+1);
             sampPoints =  (0:obj.stimulus.dt:obj.T);
             queryPoints = (0:obj.dt:obj.T);
             CGP = interp1( sampPoints, sampVal ,queryPoints, 'spline' );
             obj.CGP{k} = CGP(1:end-1)'; % removing interp bias
             CP = obj.CP;
         elseif resampleFlag && ~syntDataFlag % everything is already resampled and not syntetic data
-            obj.CGP{k} =  conv( obj.stimulus.Yuncorr, amp * obj.STA(k).realSTA, 'same');
+            cgp =  conv( obj.stimulus.Yuncorr, amp * obj.STA(k).realSTA, 'full');
+            obj.CGP{k} = cgp(1:end-length(obj.STA(k).realSTA)+1);
 %             time =  (0:obj.stimulus.dt:obj.T-obj.stimulus.dt); % this can
 %             be used for no interp nor resampling nl estimation
 %             CP{k} =  histc(obj.spiketimes{k}, time);            
