@@ -39,8 +39,10 @@ obj.acorr.lambda_Corr_RAW = mat2cell( corrStack_L, length(corrStack_L) , ones(ob
 
 % compare visually to extract good data
 if flagCompare
+    nl = {obj.NlinKernel.estimation};
+    theta_ALL = cellfun(@(s) s.fitParam, nl,'UniformOutput', false);
     lambdaCorr_forw = cellfun(@(x1,x2) xcorr( polyval(x1,x2), obj.maxlags,'unbiased') ,...
-                        {obj.NlinKernel.estimation(:).polyfit}', obj.CGP(:),...
+                        theta_ALL', obj.CGP(:),...
                         'UniformOutput',false);                    
     lambdaCorr_back = obj.acorr.lambda_Corr_RAW;   
     plotCompare( lambdaCorr_back, lambdaCorr_forw, obj.acorr.lags, 6, 'cell', 1, (1:24));

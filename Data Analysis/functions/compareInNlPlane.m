@@ -7,7 +7,9 @@ function [ ] = compareInNlPlane( obj )
 s = obj.stimulus.Yuncorr; 
 h = {obj.STA.realSTA};
 x = obj.CGP;
-theta = {obj.NlinKernel.estimation.polyfit};
+% theta = {obj.NlinKernel.estimation.fitParam};
+nl = {obj.NlinKernel.estimation};
+theta_ALL = cellfun(@(s) s.fitParam, nl,'UniformOutput', false);
 R_lambd_b = obj.acorr.lambda_Corr_RAW;
 [ R_lambd_f,R_lambd_b_BIN ] = deal(cell(numel(R_lambd_b),1));
 
@@ -17,6 +19,7 @@ for k = 1:obj.numChannels
     % find statistical properties and compare assuming WSS
 %     h{k} = h{k}; % the linear kernel should have a negative sign (?ASK SHY?)
     xk = conv( h{k}, s, 'full' ); % x{k} is biased due to the 'same' property (the signal is not really WSS)
+    xk = xk(1:length(s));
     E_xk = mean( xk ); 
     E_xk_est = mean( s ) * sum( h{k} );
     var_xk = var( xk );
@@ -32,7 +35,8 @@ for k = 1:obj.numChannels
     var_xk_est = E_x_ttau_intrp(obj.maxlags+1) - E_xk_est.^2; 
     
     %     find R_lambd_f according to formula
-    theta = fliplr(obj.NlinKernel.estimation(k).polyfit);
+%     theta = fliplr(obj.NlinKernel.estimation(k).polyfit);
+    theta = fliplr(theta_ALL{k});
     R_lambd_f{k} = theta(1)*theta(1) + 2*theta(1)*theta(2)*E_xk + 2*theta(1)*theta(3)*var_xk...
                 + theta(2)*theta(2) .* E_x_ttau_intrp + theta(3)*theta(3)... 
                 .* (var_xk.^2 + 2.*E_x_ttau_intrp.^2) + 2*theta(2)*theta(3).*var_xk.*E_xk;  
@@ -53,11 +57,11 @@ for k = 1:obj.numChannels
     for n = 1:numBins
         flagBinMembers = (whichBin == n);
         binMembers     = R_right_side(flagBinMembers);
-        R_BIN(n)     = mean(binMembers);
+        R_BIN(n)       = mean(binMembers);
     end
     R_lambd_b_BIN{k} = interp1( [-fliplr(binEdges) binEdges], [fliplr(R_BIN) R_BIN] ,timeaxis, 'spline' );
     
-%     R_lambd_f{k} = xcorr( polyval(obj.NlinKernel.estimation(k).polyfit,...
+%     R_lambd_f{k} = xcorr( polyval(theta{k},...
 %     xk), obj.maxlags,'unbiased'); % this is the crude numerical acorr
 %     with original h and s
 end

@@ -37,11 +37,11 @@ for k = 1:numFigures
     for n = 1:num2disp
         try
             dataNum = cellIndx(n+(k-1)*num2disp);
-            s(n) = subplot(x,y,n);
+            s(n) = subplot(y,x,n);
             if exist('cellarray2','var') % plot - 2 signals to compare
                 if method
                 plot(timeaxis{dataNum}, normalize(cellarray1{dataNum},method)...
-                    , timeaxis{dataNum}, normalize(cellarray2{dataNum},method),'r');
+                    , timeaxis{dataNum}, normalize(cellarray2{dataNum},method),'.r');
                 title(s(n),[title_arg,' ',num2str(dataNum)]);
                 else
                     plot(timeaxis{dataNum}, cellarray1{dataNum},'--', timeaxis{dataNum}, cellarray2{dataNum},'r');
@@ -63,7 +63,7 @@ for k = 1:numFigures
 %         axis([-.5 .5 -Inf Inf]);
         axis([timeaxis{dataNum}(1) timeaxis{dataNum}(end) -inf inf]);
 %         title(s(n),[title,' ',num2str(dataNum)]); 
-        xlabel('t [sec]');ylabel('STA standartized');
+        xlabel('Linear prediction');ylabel('Expected firing rate (Hz)');
     end
 %     legend('CGP corr','STA corr');
 %     legend('R_{dN}{(\tau)}','R_{\lambda}{(\tau)}')

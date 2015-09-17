@@ -13,11 +13,13 @@ syntDataFlag = 0;
 if nargin == 3
     polyorder = varargin{1};
     showFlag = varargin{2};
+    method = varargin{3};
     resampleFlag = any(strcmp(varargin,'resampled stimulus')); 
 elseif nargin > 3
     polyorder = varargin{1};
     showFlag = varargin{2};
     amp = varargin{3};
+    method = varargin{4};
     syntDataFlag = any(strcmp(varargin,'Synt Data'));
     resampleFlag = any(strcmp(varargin,'resampled stimulus'));
 end
@@ -44,11 +46,14 @@ for k = 1:obj.numChannels
         end
         
         % normalize the linear prediction and weighted binning of the functions domain
-        u = obj.CGP{k}/std(obj.CGP{k}); 
+%         u = obj.CGP{k}/std(obj.CGP{k}); 
+        u = obj.CGP{k};
         p = prctile(u',linspace(0,100,101)); 
         p(end)=p(end)+eps;
 
-        % plug CGP values to binned domain and keep the order
+        % plug CGP values to binned domain and keep the order. bin is a
+        % mapping of the u values to ther percentile's centers ( it's hist
+        % should be approximatly uniform)
         [N,bin]=histc(u,p); 
         N=N(1:end-1);
 
@@ -60,13 +65,24 @@ for k = 1:obj.numChannels
         
         domain_bin = accumarray(bin,u,[],@mean); % the domain (X axis) of the non linearity
         image_bin{k} = accumarray(bin,CP{k},[],@mean); % the image (Y axis) find how many spikes for each bin
-        param{k} = polyfit(domain_bin,image_bin{k},polyorder); % calculate polynomial fit
-        nl_est{k,1} = domain_bin;
-        nl_est{k,2} = polyval(param{k},domain_bin);
-        nl_bin{k} = bin;
+        
+        switch method
+            case 'poly'
+                param{k} = polyfit(domain_bin,image_bin{k},polyorder); % calculate polynomial fit
+                nl_est{k,1} = domain_bin;
+                nl_est{k,2} = polyval(param{k},domain_bin);
+                nl_bin{k} = bin;
+                
+            case 'exp'
+                expfit_OBJ = fit(domain_bin,image_bin{k},'exp1');
+                param{k} = [expfit_OBJ.a expfit_OBJ.b];
+                nl_est{k,1} = domain_bin;
+                nl_est{k,2} = expfit_OBJ.a * exp( expfit_OBJ.b .* domain_bin ); 
+                nl_bin{k} = bin;
+        end
         
         % CAUTION - might not work with real (not synt) data
-        obj.NlinKernel(k).estimation = struct('domain',nl_est(k,1),'image',nl_est(k,2),'bin', nl_bin(k),'polyfit',param(k));
+        obj.NlinKernel.estimation(k) = struct('domain',nl_est(k,1),'image',nl_est(k,2),'bin', nl_bin(k),'fitParam',param(k));
 end
 
 
