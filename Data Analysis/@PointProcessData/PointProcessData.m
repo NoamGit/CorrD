@@ -69,12 +69,17 @@ classdef PointProcessData < PointProcess
             resampleFlag = any(strcmp(varargin,'resample stimulus'));
             numArg = nargin-1;
             
+            amp = 1;
             if numArg < 2
                 STA_NUMSAMPLES = 35 ; % [ms] default STA of 35 samples 
                 STA_LWE = 5;
-            else
+            elseif numArg == 3
                 STA_NUMSAMPLES = varargin{1};
                 STA_LWE = varargin{2};
+            elseif numArg == 4
+                STA_NUMSAMPLES = varargin{1};
+                STA_LWE = varargin{2};
+                amp = varargin{3};
             end
             
             % resample if flagged
@@ -85,7 +90,7 @@ classdef PointProcessData < PointProcess
                 
                 obj.stimulus.Yuncorr = obj.stimulus.Yuncorr(1:ceil(obj.t(end)/obj.stimulus.dt)); % prunning only to stimulus in the time axis
                 upsampledStim = repmat(obj.stimulus.Yuncorr',[upsamplingFactor 1]);
-                obj.stimulus.Yuncorr = upsampledStim(:);
+                obj.stimulus.Yuncorr = amp * upsampledStim(:);
                 obj.stimulus.dt = obj.dt;
                 STA_NUMSAMPLES = STA_NUMSAMPLES * upsamplingFactor;
                 STA_LWE = STA_LWE * upsamplingFactor;
@@ -93,10 +98,10 @@ classdef PointProcessData < PointProcess
             
             % use compute sta func t o evalate STA
             if iscell(obj.spiketimes) % multi process
-                [ sta ] = cellfun(@(ST) compute_sta( obj.stimulus.Yuncorr, ST, STA_NUMSAMPLES, STA_LWE, obj.stimulus.dt)...
+                [ sta ] = cellfun(@(ST) compute_sta( amp * obj.stimulus.Yuncorr, ST, STA_NUMSAMPLES, STA_LWE, obj.stimulus.dt)...
                     ,obj.spiketimes,'UniformOutput',false);
             else % single process
-                [ sta ] = compute_sta( obj.stimulus.Yuncorr, obj.spiketimes, STA_NUMSAMPLES, STA_LWE, obj.stimulus.dt );
+                [ sta ] = compute_sta( amp * obj.stimulus.Yuncorr, obj.spiketimes, STA_NUMSAMPLES, STA_LWE, obj.stimulus.dt );
             end
             STA_TIME = (-(STA_NUMSAMPLES-STA_LWE-1):STA_LWE) * obj.stimulus.dt;
             obj.STA = struct('timeSTA',STA_TIME,'realSTA',sta,'estSTA',[]);

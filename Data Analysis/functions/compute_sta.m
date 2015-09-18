@@ -23,6 +23,6 @@ function [ sta ] = compute_sta( stimulus, spiketimes, numSAMPLES, sta_lwe , dt_S
     spikesArrays = cellfun(@(x) stimulus(x),sta_x,'UniformOutput',false);        
 %     sta = mean(cell2mat(spikesArrays'),2);
     sta = 1 * mean(cell2mat(spikesArrays'),2); % the linear kernel should have a negative sign (?ASK SHY?)
-
+    disp('finished one sta esimation');
 end
 
