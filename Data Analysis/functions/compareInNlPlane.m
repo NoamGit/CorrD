@@ -25,8 +25,12 @@ for k = 1:obj.numChannels
     var_xk = var( xk );
     resampFactor = obj.stimulus.dt/(obj.dt);
     [R_s, lags] = xcorr(s,obj.maxlags/resampFactor,'unbiased');
+    if size(h{k},1) == 1 % if h is not colum vect -> transpose
+        h{k} = h{k}';
+    end
     E_x_ttau = conv( conv( R_s,flipud(h{k}),'same' ), h{k},'same' );
-    
+%       E_x_ttau = xcorr(conv( R_s,flipud(h{k}),'same'),obj.maxlags/resampFactor,'unbiased' );
+
     % interpolation to mutual sampling rate
     sampPoints =  lags .* obj.stimulus.dt;
     queryPoints = linspace(sampPoints(1),sampPoints(end),...

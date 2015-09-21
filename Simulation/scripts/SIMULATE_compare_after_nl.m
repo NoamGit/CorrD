@@ -24,7 +24,7 @@ for n = 1:c % build c processes
     p_kernel = [space_sig(randIdx(1)) space_mu(randIdx(2)) space_fi(randIdx(3)) space_f(randIdx(4))];
     maxlags = 2*ceil((2*sqrt(2*log(10))*space_sig(randIdx(1)))/dt_stim);   
     dt_kernel = 1/30;
-    amp_kern = 0.1;
+    amp_kern = 1;
     model_kernel = @(t) amp_kern * ( exp(-(t-p_kernel(2)).^2/p_kernel(1)^2).*sin( p_kernel(4) *(t-p_kernel(3)) ) );
 %     model_kernel = @(t) normc( exp(-(t-p_kernel(2)).^2/p_kernel(1)^2).*sin( p_kernel(4) *(t-p_kernel(3)) ) );
     t_kernel = linspace(-30*dt_kernel, 0*dt_kernel, 1/dt_stim);   
@@ -32,14 +32,14 @@ for n = 1:c % build c processes
     
     theta1_spc = linspace(0.00005, 0.00025, 200);       
     theta2_spc = linspace(0.05, 0.3, 200); 
-    theta3_spc = linspace(150,180, 200);
+    theta3_spc = linspace(170,200, 200);
     theta4_spc = linspace(5, 20, 200);       
     theta5_spc = linspace(0.15,0.2, 200); 
     randIdx = randi(200,5,1);
     % draw values and find kernel
     p_nl = [theta1_spc(randIdx(1)) theta2_spc(randIdx(2)) theta3_spc(randIdx(3)) theta4_spc(randIdx(4)) theta5_spc(randIdx(5))];
     model_nl = @(x) p_nl(1)* x.^2 + p_nl(2) * x + p_nl(3);  % define parameter space for nl
-    amp_stim = 200;
+    amp_stim = 800;
 %     model_nl = @(x) p_nl(4) * exp(x.* p_nl(5));
 %     amp = 60;
     %% create CGP, lambda and spiketimes
@@ -57,7 +57,7 @@ for n = 1:c % build c processes
     nonLinkernel = struct('domain',nl_domain,'image',nl_image,'model',model_nl,'param',p_nl);
     datainstance = struct('linKernel',kernel,'nonlinKernel',nonLinkernel,...
         'CGP',CGP,'lambd',lambda,'spiketimes',spiketimes);  
-    syntData = [syntData  datainstance];
+    syntData = [ syntData  datainstance ];
     display(['finished syntesizing process ',num2str(n)])  
     %% Validate data
     
@@ -67,8 +67,7 @@ for n = 1:c % build c processes
     
 %     figure(1);plot(t_kernel, model_kernel(t_kernel));% show kernel
 % 
-%     figure(2); 
-%     plot(nl_domain, nl_image);% show nl
+%     figure(2); plot(nl_domain, nl_image);% show nl
 %     
 %     CountigProcess = histc(spiketimes,t_stim);
 %     R_dN = xcov(CountigProcess  , maxlags, 'unbiased' )/(dt_stim^2);
@@ -96,7 +95,7 @@ end
     linKernel_orig = cellfun(@(x) amp_stim * x.val, {syntData.linKernel},'UniformOutput', false);
     process = process.CalcSTA(length(linKernel_orig{1}), 0, amp_stim, 'original stimulus'); 
     % plot
-    plotCompare({process.STA.realSTA},linKernel_orig, t_kernel, c ,'STA of cell ',6,(1:c))
+    plotCompare({process.STA.realSTA},linKernel_orig, t_kernel, c ,'STA of cell ',0,(1:c))
     legend('STA','Kernel');
     %% try nlestimation
     
@@ -130,3 +129,5 @@ end
     flagDoublet = 0; flagCompare = 0;
     process = process.PreProcessCP( 'estimatedNL', flagDoublet, flagCompare );
     compareInNlPlane( process );
+    % PROBLEM : the amplitude estimation of the STA and a small phase lag 
+    % (probabily because of the conv same)

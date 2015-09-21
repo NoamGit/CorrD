@@ -82,7 +82,7 @@ for k = 1:obj.numChannels
         end
         
         % CAUTION - might not work with real (not synt) data
-        obj.NlinKernel.estimation(k) = struct('domain',nl_est(k,1),'image',nl_est(k,2),'bin', nl_bin(k),'fitParam',param(k));
+        obj.NlinKernel(k).estimation = struct('domain',nl_est(k,1),'image',nl_est(k,2),'bin', nl_bin(k),'fitParam',param(k));
 end
 
 
