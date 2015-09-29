@@ -15,7 +15,7 @@ for k = 1:obj.numChannels
     % filter conseq doublets
     y = zeros(size(doubletIndex));
     for n = 2:length(doubletIndex)
-        y(n) = logical(doubletIndex(n) * ( (y(n-1)+doubletIndex(n))/2 - 1 ));
+        y(n) = logical(doubletIndex(n) * ( (y(n-1)+doubletIndex(n))/2 - 1 ) );
     end
     doubletIndex = [ false; logical(y) ];
     obj.spiketimes{k}(doubletIndex) = [];

@@ -60,13 +60,17 @@ for k = 1:numFigures
         catch err
             break;
         end
-%         axis([-.5 .5 -Inf Inf]);
-        axis([timeaxis{dataNum}(1) timeaxis{dataNum}(end) -inf inf]);
+        axis([-.5 .5 -Inf Inf]);
+%         axis([timeaxis{dataNum}(1) timeaxis{dataNum}(end) -inf inf]);
+        
 %         title(s(n),[title,' ',num2str(dataNum)]); 
-        xlabel('Linear prediction');ylabel('Expected firing rate (Hz)');
+%         xlabel('Linear prediction');ylabel('Expected firing rate (Hz)');
+%         xlabel('\tau[sec]');ylabel('R(\tau) standertized');
+        xlabel('\tau[sec]');ylabel('R(\tau) normalized (max)');
+
     end
 %     legend('CGP corr','STA corr');
-%     legend('R_{dN}{(\tau)}','R_{\lambda}{(\tau)}')
+    legend('Simulated Data','LNP (STA)')
 end
 end
 

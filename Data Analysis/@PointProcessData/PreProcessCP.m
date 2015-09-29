@@ -17,9 +17,9 @@ else % default settings
 end
 
 % ** optional - Doublet cancelation for Poissonian correction
-if flagDoublet
-    obj = DoubletCancel(obj);
-end
+% if flagDoublet
+%     obj = DoubletCancel(obj);
+% end
 
 % mean firing rate calculation using Krumin's function 
 % (We can change to calculate all commands only on one side of the symmetrical AC) 

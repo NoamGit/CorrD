@@ -1,4 +1,6 @@
-%% estAcorrSTA_Data_3_2 
+% estAcorrSTA_Data_3_2 
+
+%% load data module
 % comparing parametric model to real data in forward and backward
 % procedure. The comparison is done in the nl and the CGP plane
 
@@ -11,25 +13,32 @@
     % we take this width because we want max lags have 0 reminder with both sampling rates
     maxlags = ceil((0.621 * sqrt(2*log(10)) * 1)/process.dt); 
     process.maxlags = maxlags;
-
+    
+%% pre-processing data module
 % preproccessing and calculating properties of model : CGP & lambda acorr,
 % CGP, CP, STA ,nl
-    % order of polynum to be fit to the nl
-    poly_order = 2;
-    % compare visually acorr Lambda with the forward process in PreProcessCP
-    showFlag = 0;
-    % finds the sta and potentially upsamples the stimulus
+
+    poly_order = 2; % order of polynum to be fit to the nl    
+    showFlag = 0; % compare RdN flag
+ 
+    % DoubletCancel - change CP behaviour to be more poissionian like
+    flagDoublet = 1;
+    if flagDoublet
+        obj = DoubletCancel(process);
+    end
+    
+    % CalcSTA - finds the sta and potentially upsamples the stimulus
     process = process.CalcSTA('original stimulus'); 
-    % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 
+    % nlestimation - estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 
     % 10 11 13 14 17 18 21 22 23)
     amp = 1;
-    process = process.nlestimation(poly_order, showFlag, amp, 'original stimulus'); 
+    process = process.nlestimation( poly_order, showFlag, amp,'exp','original stimulus' ); 
         % process = process.CalcSTA('resampled stimulus'); % finds the sta and upsamples the stimulus
         % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); 
         % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
-    flagDoublet = 1; flagCompare = 0; % Cancel Doublet = 1 Compare = 1
+    flagCompare = 0; % Cancel Doublet = 1 Compare = 1
     process = process.PreProcessCP( 'estimatedNL', flagDoublet, flagCompare );
-%% Visualize pre processed data
+%% plot pre-processed for debugging module
 
 % ** optional - see function description
 % result - decent results in cell 4 5 7 8 15 20 23
@@ -42,7 +51,7 @@
 
 % ** optional - 
     burstDetection( process );
-%% Data fitting and optimization
+%% Data fitting and optimization module
 
 % define upper and lower bounderies for optimization
 constraintsLow = [eps 0 eps 0]; % [ N f sig rho]

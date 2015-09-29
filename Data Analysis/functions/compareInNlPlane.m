@@ -41,37 +41,41 @@ for k = 1:obj.numChannels
     %     find R_lambd_f according to formula
 %     theta = fliplr(obj.NlinKernel.estimation(k).polyfit);
     theta = fliplr(theta_ALL{k});
-    R_lambd_f{k} = theta(1)*theta(1) + 2*theta(1)*theta(2)*E_xk + 2*theta(1)*theta(3)*var_xk...
-                + theta(2)*theta(2) .* E_x_ttau_intrp + theta(3)*theta(3)... 
-                .* (var_xk.^2 + 2.*E_x_ttau_intrp.^2) + 2*theta(2)*theta(3).*var_xk.*E_xk;  
-    
+%     R_lambd_f{k} = theta(1)*theta(1) + 2*theta(1)*theta(2)*E_xk + 2*theta(1)*theta(3)*var_xk...
+%                 + theta(2)*theta(2) .* E_x_ttau_intrp + theta(3)*theta(3)... 
+%                 .* (var_xk.^2 + 2.*E_x_ttau_intrp.^2) + 2*theta(2)*theta(3).*var_xk.*E_xk;  
+%     
     % remove zero lag   value for visual comparison
     zeroLag_index = obj.maxlags+1;
     R_lambd_b{k}(zeroLag_index) = [];
-    R_lambd_f{k}(zeroLag_index) = [];
+%     R_lambd_f{k}(zeroLag_index) = [];
     timeaxis = obj.acorr.lags;
     timeaxis(zeroLag_index) = [];
     
     % binn for more poissonian like behaviour
-    binSize = 0.01; % possible values - 0.01 ~ 100 Hz 0.03
-    numBins = ceil(obj.maxlags*(obj.dt/binSize)); % define number of bins
-    binEdges = linspace( timeaxis(zeroLag_index), timeaxis(end),numBins);
-    [~,whichBin] = histc(timeaxis(zeroLag_index:end), binEdges);
-    R_right_side = R_lambd_b{k}(zeroLag_index:end);
-    for n = 1:numBins
-        flagBinMembers = (whichBin == n);
-        binMembers     = R_right_side(flagBinMembers);
-        R_BIN(n)       = mean(binMembers);
-    end
-    R_lambd_b_BIN{k} = interp1( [-fliplr(binEdges) binEdges], [fliplr(R_BIN) R_BIN] ,timeaxis, 'spline' );
+%     binSize = 0.01; % possible values - 0.01 ~ 100 Hz 0.03
+%     numBins = ceil(obj.maxlags*(obj.dt/binSize)); % define number of bins
+%     binEdges = linspace( timeaxis(zeroLag_index), timeaxis(end),numBins);
+%     [~,whichBin] = histc(timeaxis(zeroLag_index:end), binEdges);
+%     R_right_side = R_lambd_b{k}(zeroLag_index:end);
+%     for n = 1:numBins
+%         flagBinMembers = (whichBin == n);
+%         binMembers     = R_right_side(flagBinMembers);
+%         R_BIN(n)       = mean(binMembers);
+%     end
+%     R_lambd_b_BIN{k} = interp1( [-fliplr(binEdges) binEdges], [fliplr(R_BIN) R_BIN] ,timeaxis, 'spline' );
     
-%     R_lambd_f{k} = xcorr( polyval(theta{k},...
-%     xk), obj.maxlags,'unbiased'); % this is the crude numerical acorr
-%     with original h and s
+%     R_lambd_f{k} = xcorr( polyval(theta,...
+%     xk), obj.maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
+
+    R_lambd_f{k} = xcorr( theta(2) * exp( theta(1) .* xk )...
+        , obj.maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
+    
+    R_lambd_f{k}(zeroLag_index) = [];
 end
 
 % compare visually
-normMethod = 6; 
+normMethod = 1; 
 plotsPerFig = 6;
 cellstoshow = ceil(obj.numChannels/6);
 plotCompare( R_lambd_b, R_lambd_f, timeaxis, 6, 'cell', normMethod, (1:cellstoshow*plotsPerFig));
