@@ -5,7 +5,7 @@ function [ ] = compareInNlPlane( obj )
 
 % extract notations from data structures
 s = obj.stimulus.Yuncorr; 
-h = {obj.STA.realSTA};
+h = {obj.STA.STA};
 x = obj.CGP;
 % theta = {obj.NlinKernel.estimation.fitParam};
 nl = {obj.NlinKernel.estimation};
@@ -18,7 +18,7 @@ for k = 1:obj.numChannels
     
     % find statistical properties and compare assuming WSS
 %     h{k} = h{k}; % the linear kernel should have a negative sign (?ASK SHY?)
-    xk = conv( h{k}, s, 'full' ); % x{k} is biased due to the 'same' property (the signal is not really WSS)
+    xk = conv( flipud(h{k}), s, 'full' ); % x{k} is biased due to the 'same' property (the signal is not really WSS)
     xk = xk(1:length(s));
     E_xk = mean( xk ); 
     E_xk_est = mean( s ) * sum( h{k} );
@@ -50,35 +50,44 @@ for k = 1:obj.numChannels
     R_lambd_b{k}(zeroLag_index) = [];
 %     R_lambd_f{k}(zeroLag_index) = [];
     timeaxis = obj.acorr.lags;
-    timeaxis(zeroLag_index) = [];
+    timeaxis(zeroLag_index) = [];    
     
-    % binn for more poissonian like behaviour
-%     binSize = 0.01; % possible values - 0.01 ~ 100 Hz 0.03
-%     numBins = ceil(obj.maxlags*(obj.dt/binSize)); % define number of bins
-%     binEdges = linspace( timeaxis(zeroLag_index), timeaxis(end),numBins);
-%     [~,whichBin] = histc(timeaxis(zeroLag_index:end), binEdges);
-%     R_right_side = R_lambd_b{k}(zeroLag_index:end);
-%     for n = 1:numBins
-%         flagBinMembers = (whichBin == n);
-%         binMembers     = R_right_side(flagBinMembers);
-%         R_BIN(n)       = mean(binMembers);
-%     end
-%     R_lambd_b_BIN{k} = interp1( [-fliplr(binEdges) binEdges], [fliplr(R_BIN) R_BIN] ,timeaxis, 'spline' );
-    
-%     R_lambd_f{k} = xcorr( polyval(theta,...
-%     xk), obj.maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
-
-    R_lambd_f{k} = xcorr( theta(2) * exp( theta(1) .* xk )...
-        , obj.maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
+    switch obj.NlinKernel(1).type
+        
+        case 'poly'
+            R_lambd_f{k} = xcorr( polyval(theta,...
+            xk), obj.maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
+        case 'exp'% exp case
+            R_lambd_f{k} = xcorr( theta(2) * exp( theta(1) .* xk )...
+            , obj.maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
+    end
     
     R_lambd_f{k}(zeroLag_index) = [];
+    
+    %** optional Binning
+        % binn for more poissonian like behaviour
+    binSize = 0.005; % possible values - 0.01 ~ 100 Hz 0.03
+    numBins = ceil(obj.maxlags*(obj.dt/binSize)); % define number of bins
+    binEdges = linspace( timeaxis(zeroLag_index), timeaxis(end),numBins);
+    [~,whichBin] = histc(timeaxis(zeroLag_index:end), binEdges);
+    R_right_side = R_lambd_b{k}(zeroLag_index:end);
+    for n = 1:numBins
+        flagBinMembers = (whichBin == n);
+        binMembers     = R_right_side(flagBinMembers);
+        R_BIN(n)       = mean(binMembers);
+    end
+    R_lambd_b_BIN{k} = interp1( [-fliplr(binEdges) binEdges], [fliplr(R_BIN) R_BIN] ,timeaxis, 'spline' );
 end
 
 % compare visually
-normMethod = 1; 
-plotsPerFig = 6;
-cellstoshow = ceil(obj.numChannels/6);
-plotCompare( R_lambd_b, R_lambd_f, timeaxis, 6, 'cell', normMethod, (1:cellstoshow*plotsPerFig));
+plotProperties = struct('cellarray2',R_lambd_f','time',timeaxis,'method',...
+    6,'num2disp',6,'title','RdN cell ','xlabel','\tau[sec]','ylabel'...
+        ,'R(\tau) standertized','axis',[-.5 .5 -Inf Inf],'legendA',...
+        'Simulated Data','legendB','LNP (STA)');
+plotCompare( R_lambd_b, plotProperties );
+% plotCompare( R_lambd_b_BIN, plotProperties );
+
+% plotCompare( R_lambd_b, R_lambd_f, timeaxis, 6, 'cell', normMethod, (1:cellstoshow*plotsPerFig));
 
 % for figure in onenote
 % plotCompare( R_lambd_b, R_lambd_f, timeaxis, 4, 'cell', 6, [4 5 7 8 15 20 21 23]); % figure 1

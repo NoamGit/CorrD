@@ -1,22 +1,21 @@
 % estAcorrSTA_Data_3_2 
 
 %% load data module
-% comparing parametric model to real data in forward and backward
+% comparing parametric model to fit data in forward and backward
 % procedure. The comparison is done in the nl and the CGP plane
 
-% Load data
+% Loads data (also calculates CP)
     D = LoadDataIntoProcess( 'Segev''s Data' ); % loads Segev's data
     process = D.Data;
 
 % Define structure of assumed linear kernel
-    kernNAME = 'gaussSine';    
     % we take this width because we want max lags have 0 reminder with both sampling rates
     maxlags = ceil((0.621 * sqrt(2*log(10)) * 1)/process.dt); 
     process.maxlags = maxlags;
     
 %% pre-processing data module
 % preproccessing and calculating properties of model : CGP & lambda acorr,
-% CGP, CP, STA ,nl
+% CGP, STA ,nl
 
     poly_order = 2; % order of polynum to be fit to the nl    
     showFlag = 0; % compare RdN flag
@@ -29,20 +28,39 @@
     
     % CalcSTA - finds the sta and potentially upsamples the stimulus
     process = process.CalcSTA('original stimulus'); 
-    % nlestimation - estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 
-    % 10 11 13 14 17 18 21 22 23)
+    
+    % nlestimation - estimates nl and calculates CGP 
     amp = 1;
-    process = process.nlestimation( poly_order, showFlag, amp,'exp','original stimulus' ); 
+    nlType = 'exp';
+    process = process.nlestimation( poly_order, showFlag, amp, nlType,'original stimulus', 'resample CP' ); 
         % process = process.CalcSTA('resampled stimulus'); % finds the sta and upsamples the stimulus
         % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); 
-        % estimates nl and calculates CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
-    flagCompare = 0; % Cancel Doublet = 1 Compare = 1
-    process = process.PreProcessCP( 'estimatedNL', flagDoublet, flagCompare );
+        
+    % calculates acorr and can calc CGP ( showFlag 1 yields good samples 3 6 10 11 13 14 17 18 21 22 23)
+    flagCompare = 0; % Compare = 1
+    process = process.PreProcessCP( nlType, flagDoublet, flagCompare );
 %% plot pre-processed for debugging module
+warning('off');
+
+% Show STA estimation
+    [STA_trim,time_trim] = deal(cell(process.numChannels,1));
+    for k = 1:process.numChannels
+        idx = process.STA(k).timeSTA <= 0;
+        STA_trim{k} = process.STA(k).STA(idx);
+        time_trim{k} = process.STA(k).timeSTA(idx);
+    end
+    plotProperties = struct('time',time_trim,'method',...
+        0,'num2disp',6,'title','STA cell - ','xlabel','time [sec]');
+    plotCompare( STA_trim, plotProperties );
+
+% show nl estimation - yields good samples 3 6 7 11 12 15 17 18 19 20)
+    showFlag = 1;
+    process = process.nlestimation( poly_order, showFlag, amp, nlType,'original stimulus' ); 
 
 % ** optional - see function description
 % result - decent results in cell 4 5 7 8 15 20 23
 %          not so great results 3 6 11 13
+% current problem - COMPARE SCALE WITH ONENOTE
     compareInNlPlane( process );
 
 % ** optional - see func description
@@ -63,7 +81,7 @@ time_STIM = linspace(0,  length(process.stimulus.Yuncorr)*dt_STIM,  size(process
 STA_LENGTH = 35;
 process = process.CalcSTA( STA_LENGTH, 5);
 
-warning('off');
+
 
 %%
 %         figure(1);
@@ -79,7 +97,7 @@ warning('off');
 % numcoeff = 4;
 % N = length(time);
 % dfe = N - numcoeff; % degrees of freedom - number of observations - num of coefficients
-% realSTA = {process.STA.realSTA}';
+% STA = {process.STA.STA}';
 % % modelfun = @(sig, f, mu, phi) exp((-(time-mu).^2)/sig.^2) .* sin( (2*pi*f).* (time - phi) ); % original Kernel model
 % % costfun = @(Y) (@(x) sum( (Y' - modelfun(x(1),x(2),x(3),x(4))).^2 )); % SA with direct search  [sig f mu phi]
 % modelfun = @(sig, f, mu, phi) normax( exp((-(time-mu).^2)/sig.^2) .* sin( (2*pi*f).* (time - phi) ) ); % with normax
@@ -102,10 +120,10 @@ warning('off');
 % optimData = struct('LowConstr',LowConstr,'UppConstr',UppConstr,'numcoeff',...
 %     numcoeff,'process',process,'STA_LENGTH',STA_LENGTH,'costfun',costfun,...
 %     'modelfun',modelfun,'N',N,'dfe',dfe);
-% [ estSTA, res, goodness, estPARAM ] = multiOptim_PARFOR( realSTA, optimData );
+% [ estSTA, res, goodness, estPARAM ] = multiOptim_PARFOR( STA, optimData );
 % 
 % range = (1:process.numChannels);
-% optimResults = struct('time',time,'data',realSTA,'estimationSTA',estSTA,...
+% optimResults = struct('time',time,'data',STA,'estimationSTA',estSTA,...
 %     'estimationPARAM',estPARAM,'Stat_goondness',goodness);               
 % %% Parralel loop through all STAs
 % % 2DO - each worker overrides 2 calculations (except of the last one)
@@ -131,23 +149,23 @@ warning('off');
 %     %         for n = numIterLP(1):numIterLP(end)      
 %                 fprintf('working on %d''th STA fitting ...\n', n);    
 % 
-%                 costIter = costfun(normax( realSTA{n} ));
+%                 costIter = costfun(normax( STA{n} ));
 %     %             [p_est,~,~,output] = annealData2Acorr(x0, LowConstr,UppConstr,costIter);          
 %     %             [p_est,~,~,output] = gps_Data2STA(x0 , LowConstr,UppConstr, costIter);
 %                 [p_est,~,~,output] = ga_Data2STA( numcoeff, LowConstr,UppConstr, costIter);
 %     %             fprintf('current n is %d \n' ,n); 
 %                 estSTA = modelfun( p_est(1), p_est(2), p_est(3), p_est(4)); % [sig f mu phi]   
-%     %             plotFit( time, normax(realSTA{n}) , estSTA, 'STA 1 fit')
+%     %             plotFit( time, normax(STA{n}) , estSTA, 'STA 1 fit')
 % 
 %                 % Evaluating goodness of optimization and fit
-%                 res = normax(realSTA{n}) - estSTA';  
+%                 res = normax(STA{n}) - estSTA';  
 %                 goodness = iGoodnessStructure(estSTA,[],res,dfe,N);
 %                 
 %                 if goodness.rsquare < .85
 %                     AreAllOptim(n) = false;
 %                 end
 %     %             estSTA(n,:) = modelfun( p_est(1), p_est(2), p_est(3), p_est(4)); % [sig f mu phi]   
-%     %             res(n,:) = normax(realSTA{n}) - estSTA';  
+%     %             res(n,:) = normax(STA{n}) - estSTA';  
 %     %             goodness(n) = iGoodnessStructure(estSTA,[],res,dfe,N);
 %             end
 %     end  
@@ -155,9 +173,9 @@ warning('off');
 %     disp(['Are All Optimized? ',num2str( AreAllOptim' )])
 %     numIterGlobal = numIterGlobal + 1;
 %     numIterD = distributed(  processArray(AreAllOptim) );
-%     optimResults{numIterGlobal} = struct('time',time,'data',{realSTA(range)},'estimation', {estSTA(range)},'Stat_goondness',{goodness(range)},'optimOut', {output(range)});               
+%     optimResults{numIterGlobal} = struct('time',time,'data',{STA(range)},'estimation', {estSTA(range)},'Stat_goondness',{goodness(range)},'optimOut', {output(range)});               
 % end
 % range = (1:process.numChannels);
-% optimResults = struct('time',time,'data',{realSTA(range)},'estimation', {estSTA(range)},'Stat_goondness',{goodness(range)},'optimOut', {output(range)});               
+% optimResults = struct('time',time,'data',{STA(range)},'estimation', {estSTA(range)},'Stat_goondness',{goodness(range)},'optimOut', {output(range)});               
 % 
 % temp = goodness(range);cellfun(@(x)disp(x.rsquare),temp)

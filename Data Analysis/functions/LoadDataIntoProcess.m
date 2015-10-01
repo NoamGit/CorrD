@@ -50,8 +50,8 @@ switch varargin{1}
         % D.W(:,1) probabily indicates on times that the stimulus is "refreshed"
         % so it might be a an empty gap 
         
-        D = load('C:\Users\Noam\Documents\GitHub\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat');
-%         D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
+%         D = load('C:\Users\Noam\Documents\GitHub\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat');
+        D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
         stimRate = 30; % 30 [hz]        
         sr = 10e3; % sampling rate [hz]
         sr_new = 450; % resampling parameter [hz] rem( 480 , 30) = 0 ;

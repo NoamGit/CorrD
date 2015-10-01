@@ -8,7 +8,7 @@ classdef PointProcessData < PointProcess
         
         % features
         CP % Couting process from spiketimes
-        STA % real and estimated STA
+        STA % time, STA and fitted STA
         recoveryFunc % recovery probability after refact
     end
     
@@ -104,7 +104,7 @@ classdef PointProcessData < PointProcess
                 [ sta ] = compute_sta( amp * obj.stimulus.Yuncorr, obj.spiketimes, STA_NUMSAMPLES, STA_LWE, obj.stimulus.dt );
             end
             STA_TIME = (-(STA_NUMSAMPLES-STA_LWE-1):STA_LWE) * obj.stimulus.dt;
-            obj.STA = struct('timeSTA',STA_TIME,'realSTA',sta,'estSTA',[]);
+            obj.STA = struct('timeSTA',STA_TIME,'STA',sta,'fitSTA',[]);
         end
         
         %% proprocess data according to LNP model

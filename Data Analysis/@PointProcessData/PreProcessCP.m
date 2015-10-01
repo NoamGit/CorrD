@@ -10,7 +10,6 @@ function obj = PreProcessCP( obj,varargin )
 flagCompare = 0;
 if nargin > 1 %define the non linearity type
     NLtype = varargin{1};
-    flagDoublet = varargin{2};
     flagCompare = varargin{3};
 else % default settings
     NLtype = 'exp';
@@ -29,9 +28,9 @@ EStack = cell2mat(E_lambda);
 corrStack_L = cell2mat(lambda_Corr_RAW') ;
 
 % calculate CGP for modeldriven non linearity
-if( any(strcmp(NLtype,{'abs','sqrt','exp'})) )
-    CGPestimation_ModelDriven( obj, NLtype )
-end
+% if( any(strcmp(NLtype,{'abs','sqrt','exp'})) )
+%     CGPestimation_ModelDriven( obj, NLtype )
+% end
 
 % Assign data to Data structure
 obj.acorr.lags = (-obj.maxlags:obj.maxlags) .* obj.dt;
