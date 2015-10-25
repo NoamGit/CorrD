@@ -61,18 +61,14 @@ switch varargin{1}
         stimRate = 30; % 30 [hz]        
         sr = 10e3; % sampling rate [hz]
         sr_new = 450; % resampling parameter [hz] rem( 480 , 30) = 0 ;
-        
         if nargin > 1
             switch varargin{2}
                 case 'exp'
-                    modelfunc = @(theta) theta(2) * exp( theta(1) .* t );
+                    modelfunc = @(mu, sig) exp( mu + sig * t);theta(2) * exp( theta(1) .* xk )
                     nl_model = struct('type', 'exp', 'model', modelfunc,'estimation',[] ); % default kernel is exp
                 case 'poly'
-                    modelfunc = @(theta) polyval(fliplr(theta), t);
+                     modelfunc = @(theta) polyval(fliplr(theta), t);
                     nl_model = struct('type', 'poly', 'model', modelfunc,'estimation',[] ); % default kernel is exp
-            end
-        end
-        
         spiketimes_all = cellfun(@(x) x .* 1/sr, {D.TT.sp},'UniformOutput',false);
         spiketimes = cellfun(@(x) x( x <= 900 ), spiketimes_all,'UniformOutput',false); % only first 900 sec are used for this experiment
         stimulusRAW = D.W(:,3); % W(:,3) matrix

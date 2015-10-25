@@ -5,8 +5,7 @@
 % procedure. The comparison is done in the nl and the CGP plane
 
 % Loads data (also calculates CP)
-    nlType = 'poly';
-    D = LoadDataIntoProcess( 'Segev''s Data', nlType ); % loads Segev's data
+    D = LoadDataIntoProcess( 'Segev''s Data' ); % loads Segev's data
     process = D.Data;
 
 % Define structure of assumed linear kernel
@@ -32,6 +31,7 @@
     
     % nlestimation - estimates nl and calculates CGP 
     amp = 1;
+    nlType = 'poly';
     process = process.nlestimation( poly_order, showFlag, amp, nlType,'original stimulus', 'resample CP' ); 
         % process = process.CalcSTA('resampled stimulus'); % finds the sta and upsamples the stimulus
         % process = process.nlestimation(poly_order, showFlag, 'resample stimulus'); 
