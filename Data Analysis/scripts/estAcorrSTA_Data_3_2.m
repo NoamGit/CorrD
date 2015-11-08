@@ -5,7 +5,7 @@
 % procedure. The comparison is done in the nl and the CGP plane
 
 % Loads data (also calculates CP)
-    nlType = 'poly';
+    nlType = 'exp';
     D = LoadDataIntoProcess( 'Segev''s Data', nlType ); % loads Segev's data
     process = D.Data;
 
@@ -22,7 +22,7 @@
     showFlag = 0; % compare RdN flag
  
     % DoubletCancel - change CP behaviour to be more poissionian like
-    flagDoublet = 1;
+    flagDoublet = 0;
     if flagDoublet
         obj = DoubletCancel(process);
     end
@@ -58,7 +58,6 @@ warning('off');
     process = process.nlestimation( poly_order, showFlag, amp, nlType,'original stimulus' ); 
 
 % ** optional - see function description - result : exlude cells 9 
-% current problem - COMPARE SCALE WITH ONENOTE
     compareInNlPlane( process );
 
 % ** optional - see func description

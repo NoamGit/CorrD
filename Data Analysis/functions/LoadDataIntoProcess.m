@@ -51,12 +51,16 @@ switch varargin{1}
         % so it might be a an empty gap 
         
         try
-            D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
+            D = load('C:\Users\noambox\Documents\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path  
         catch exception
-            disp(exception.message);
-            display('file was not found. Please load manually...');
-            [fileN, pathN ] = uigetfile('*.mat','Select Data file');    % C:\Users\Noam\Documents\GitHub\...SpikeTimeGauss1B.mat
-            D = load([ pathN, fileN ]); % change path
+            try
+                 D = load('C:\Users\Noam\Documents\GitHub\CorrD\SourceData\Ronen\SpikeTimeGauss1B.mat'); % change path
+            catch exception
+                 disp(exception.message);
+                display('file was not found. Please load manually...');
+                [fileN, pathN ] = uigetfile('*.mat','Select Data file');    % C:\Users\Noam\Documents\GitHub\...SpikeTimeGauss1B.mat
+                D = load([ pathN, fileN ]); % change path
+            end
         end        
         stimRate = 30; % 30 [hz]        
         sr = 10e3; % sampling rate [hz]

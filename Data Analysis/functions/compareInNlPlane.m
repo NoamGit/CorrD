@@ -76,13 +76,13 @@ for k = 1:obj.numChannels
 %     timeaxis(maxlags+1) = [];    
 
 %     find R_lambd_f numerically
-    theta = fliplr(theta_ALL{k});
+    theta = theta_ALL{k};
     switch obj.NlinKernel(1).type      
-        case 'poly'
-            R_lambd_f{k} = xcorr( polyval(fliplr(theta),...
-            xk), maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
+        case 'poly' % poly case
+            R_lambd_f{k} = xcorr( polyval(theta,xk),...
+                maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
         case 'exp'% exp case
-            R_lambd_f{k} = xcorr( theta(2) * exp( theta(1) .* xk )...
+            R_lambd_f{k} = xcorr( theta(1) * exp( theta(2) .* xk )...
             , maxlags,'unbiased'); % this is the crude numerical acorr with original h and s
     end
     
