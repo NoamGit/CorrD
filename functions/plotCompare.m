@@ -13,30 +13,30 @@ xlabelUser = 'time';
 ylabelUser = 'amplitude';
 
 if any(isstruct( varargin{:} ))
-    if( any(isfield(varargin{1},'cellarray2')) );cellarray2 = {varargin{1}.cellarray2}; end;
-    if( any(isfield(varargin{1},'time')) );timeaxis = varargin{1}.time; end;
-    if( any(isfield(varargin{1},'method')) );method = varargin{1}.method; end;
-    if( any(isfield(varargin{1},'num2disp')) );num2disp = varargin{1}.num2disp; end;
-    if( any(isfield(varargin{1},'title')) );title_arg = varargin{1}.title; end;
-    if( any(isfield(varargin{1},'cellIndx')) );cellIndx = varargin{1}.cellIndx; end;
-    if( any(isfield(varargin{1},'axis')) ); axisUser = varargin{1}.axis; end;
-    if( any(isfield(varargin{1},'xlabel')) );xlabelUser = varargin{1}.xlabel; end;
-    if( any(isfield(varargin{1},'ylabel')) );ylabelUser = varargin{1}.ylabel; end;
-    if( any(isfield(varargin{1},'legendA')) );legendAUser = varargin{1}.legendA; end;
-    if( any(isfield(varargin{1},'legendB')) );legendBUser = varargin{1}.legendB; end;
+        if( any(isfield(varargin{1},'cellarray2')) );cellarray2 = {varargin{1}.cellarray2}; end;
+        if( any(isfield(varargin{1},'time')) );timeaxis = varargin{1}.time; end;
+        if( any(isfield(varargin{1},'method')) );method = varargin{1}.method; end;
+        if( any(isfield(varargin{1},'num2disp')) );num2disp = varargin{1}.num2disp; end;
+        if( any(isfield(varargin{1},'title')) );title_arg = varargin{1}.title; end;
+        if( any(isfield(varargin{1},'cellIndx')) );cellIndx = varargin{1}.cellIndx; end;
+        if( any(isfield(varargin{1},'axis')) ); axisUser = varargin{1}.axis; end;
+        if( any(isfield(varargin{1},'xlabel')) );xlabelUser = varargin{1}.xlabel; end;
+        if( any(isfield(varargin{1},'ylabel')) );ylabelUser = varargin{1}.ylabel; end;
+        if( any(isfield(varargin{1},'legendA')) );legendAUser = varargin{1}.legendA; end;
+        if( any(isfield(varargin{1},'legendB')) );legendBUser = varargin{1}.legendB; end;
 
-elseif nargin == 2
-    timeaxis = varargin{1};
-elseif nargin == 3
-    timeaxis = varargin{1};
-    cellIndx = varargin{2};
-elseif nargin > 2
-    cellarray2 = varargin{1};
-    timeaxis = varargin{2};
-    num2disp = varargin{3};
-    title_arg = varargin{4};
-    method = varargin{5};
-    cellIndx = varargin{6};
+    elseif nargin == 2
+        timeaxis = varargin{1};
+    elseif nargin == 3
+        timeaxis = varargin{1};
+        cellIndx = varargin{2};
+    elseif nargin > 2
+        cellarray2 = varargin{1};
+        timeaxis = varargin{2};
+        num2disp = varargin{3};
+        title_arg = varargin{4};
+        method = varargin{5};
+        cellIndx = varargin{6};
 end
 
 if ~iscell(timeaxis)

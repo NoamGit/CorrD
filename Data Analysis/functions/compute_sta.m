@@ -14,6 +14,7 @@ function [ sta ] = compute_sta( stimulus, spiketimes, numSAMPLES, sta_lwe , dt_S
     
     % This command finds the indices of all of the spikes that occur
     % after numSAMPLES samples into the recording and before the end of the stimulus
+    
     spike_SAMPLES = spiketimes/dt_STIM;
     spike_SAMPLES_rel = round(   spike_SAMPLES(  spike_SAMPLES > numSAMPLES &...         % all spikes after a STA size window (windowSize)
         ( spike_SAMPLES + numSAMPLES < length(stimulus) )  )   );                    % all spikes after the last sample of stimulus - windowSize
@@ -23,6 +24,6 @@ function [ sta ] = compute_sta( stimulus, spiketimes, numSAMPLES, sta_lwe , dt_S
     spikesArrays = cellfun(@(x) stimulus(x),sta_x,'UniformOutput',false);        
 %     sta = mean(cell2mat(spikesArrays'),2);
     sta = 1 * mean(cell2mat(spikesArrays'),2); % the linear kernel should have a negative sign (?ASK SHY?)
-    disp('finished one sta esimation');
+%     disp('finished one sta esimation');
 end
 

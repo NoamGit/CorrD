@@ -6,6 +6,16 @@ function [ ] = compareInNlPlane( obj )
 % extract notations from data structures
 s = obj.stimulus.Yuncorr; 
 h = {obj.STA.STA};
+
+% prior of optimal STA gain
+try
+    N = load('staGain.mat');
+    N = N.N;
+catch exception
+    N = ones(obj.numChannels,1);
+end
+h = arrayfun(@(k) h{k} * N(k),(1:obj.numChannels),'UniformOutput',false);
+
 x = obj.CGP;
 % theta = {obj.NlinKernel.estimation.fitParam};
 nl = {obj.NlinKernel.estimation};
@@ -105,9 +115,9 @@ end
 
 % compare visually
 plotProperties = struct('cellarray2',R_lambd_f','time',timeaxis,'method',...
-    6,'num2disp',6,'title','RdN cell ','xlabel','\tau[sec]','ylabel'...
+    6,'num2disp',6,'title','R_{dN}(\tau) cell ','xlabel','\tau[sec]','ylabel'...
         ,'R(\tau) standertized','axis',[-0.5 0.5 -Inf Inf],'legendA',...
-        'Simulated Data','legendB','LNP (STA)');
+        'Data','legendB','LNP(STA) ');
 plotCompare( R_lambd_b, plotProperties );
 % plotCompare( R_lambd_b_BIN, plotProperties );
 

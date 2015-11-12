@@ -100,7 +100,7 @@ for k = 1:obj.numChannels
 end
 
 if showFlag
-num2disp = 10;
+num2disp = 6;
 [fact] = factor(num2disp);
 x = prod(fact(1:ceil(length(fact)/2))); 
 y =  prod(fact(ceil(length(fact)/2)+1:end));

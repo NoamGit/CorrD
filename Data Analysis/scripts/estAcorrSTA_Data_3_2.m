@@ -54,7 +54,7 @@ warning('off');
     plotCompare( STA_trim, plotProperties );
 
 % show nl estimation - results 'exp' and 'poly' : exclude cells 1 7 9 10 13 14 16 21 22 
-    showFlag = 1;
+    showFlag = 0;
     process = process.nlestimation( poly_order, showFlag, amp, nlType,'original stimulus' ); 
 
 % ** optional - see function description - result : exlude cells 9 
