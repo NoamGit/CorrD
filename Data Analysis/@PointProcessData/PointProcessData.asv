@@ -9,7 +9,6 @@ classdef PointProcessData < PointProcess
         % features
         CP % Couting process from spiketimes
         STA % time, STA and fitted STA
-        STC % time, STC matrix and explained variance precentage
         recoveryFunc % recovery probability after refact
     end
     
@@ -108,9 +107,7 @@ classdef PointProcessData < PointProcess
             obj.STA = struct('timeSTA',STA_TIME,'STA',sta,'fitSTA',[]);
         end
         
-        %% Calc STC of process TODO
-        function obj = CalcSTC( obj, varargin)
-        end
+        %% Calc ST
         %% proprocess data according to LNP model
         obj = PreProcessCP( obj, varargin )
         

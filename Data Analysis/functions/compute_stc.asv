@@ -1,4 +1,4 @@
-function [ eig_vec, mu, explained, eig_val, X, rawStimuli ] = compute_stc( stimulus, CP, numSamples, sta, method)
+function [ eig_vec, mu, explained, eig_val ] = compute_stc( stimulus, CP, numSamples, sta, method)
 %compute_stc Calculates the spike-triggered covariance for a neuron that
 %           is driven by a stimulus defined in stim. The spike-
 %           inputs: 
@@ -26,22 +26,21 @@ function [ eig_vec, mu, explained, eig_val, X, rawStimuli ] = compute_stc( stimu
         if (size(sta,1) == 1)
             sta = sta';
         end
-        X_StaOutProjected = X - bsxfun(@times,sta', X * sta)./(norm(sta).^2);
-    else
-        X_StaOutProjected = X;
+        X = X - bsxfun(@times,sta', X * sta)./(norm(sta).^2);
     end
     
     % 2. cacl COV matrix
-    [eig_vec, score, eig_val, tsqr ,explained, mu ] = pca(X_StaOutProjected);
+    [eig_vec, score, eig_val, tsqr ,explained, mu ] = pca(X);
     
     % omitting out the last value if supress sta is in use
     if strcmp(method,'suppress sta')
         eig_vec = eig_vec(:, 1:end-1);
+        score = score(1:end-1);
         eig_val = eig_val(1:end-1);
         explained = explained(1:end-1);
     end
     
-%     disp(['explained 1-10 ', mat2str(explained(1:10)')]);
+    disp(['explained 1-10 ', mat2str(explained(1:10)')]);
 end
 
 

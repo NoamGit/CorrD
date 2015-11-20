@@ -27,7 +27,7 @@ cpxproc = generateProcess( cpxproc, amp );
 
 [ sta, w_sta ] = compute_white_sta(cpxproc.stimulus, cpxproc.CP, 3/(1/Fs) );
 
-[e_vec, est_sta, var_prec] = compute_stc( cpxproc.stimulus, cpxproc.CP, 3/(1/Fs), sta);
+[e_vec, est_sta, var_prec] = compute_stc( cpxproc.stimulus, cpxproc.CP, 3/(1/Fs), sta, 'suppress sta');
 %% plots
 
 figure;
@@ -35,7 +35,7 @@ hold on;
 plot(sta1)
 plot(sta,'--r')
 plot(w_sta,'ok')
-legend('sta','sta2','w_sta');
+legend('sta','sta2','white sta');
 hold off;
 
 figure;
@@ -57,5 +57,5 @@ hold off;
 figure();
 plot(var_prec','o','MarkerFaceColor',[0 0.447058826684952 0.74117648601532]);
 xlabel('Eigenvalue number');
-ylabel('Explanied precentage of Var');
+ylabel('Explanied precentage of Variance');
 title('STC Analysis');

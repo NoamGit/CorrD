@@ -66,6 +66,13 @@ warning('off');
 
 % ** optional - 
     burstDetection( process );
+    
+%% STC analysis module
+
+
+[ sta, w_sta ] = compute_white_sta(process.stimulus, process.CP, 3/(1/Fs) );
+
+[e_vec, est_sta, var_prec] = compute_stc( cpxproc.stimulus, cpxproc.CP, 3/(1/Fs), sta, 'suppress sta');
 %% back to data cleansing
 
 

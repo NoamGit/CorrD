@@ -18,7 +18,7 @@ function [ sta, w_sta ] = compute_white_sta( stimulus, CP, numSamples )
     X = bsxfun(@times, X_squeeze ,Y);
     
     % 2. find sta 
-    sta = mean(X,1);
+    sta = mean(X,1)';
     w_sta = inv(X' * X) * X' * Y;
 end
 
