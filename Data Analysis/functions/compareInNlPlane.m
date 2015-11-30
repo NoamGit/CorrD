@@ -42,7 +42,7 @@ for k = 1:obj.numChannels
     end
     E_x_ttau = conv( conv( R_s,flipud(h{k}),'same' ), h{k},'same' );
     var_xk_est = E_x_ttau(obj.maxlags/resampFactor+1) - E_xk_est.^2; 
-%       E_x_ttau = xcorr(conv( R_s,flipud(h{k}),'same'),obj.maxlags/resampFactor,'unbiased' );
+    E_x_ttau = xcorr(conv( R_s,flipud(h{k}),'same'),obj.maxlags/resampFactor,'unbiased' );
     
     % downsampling to mutual low sampling rate
     zeroLag_index = obj.maxlags+1;
@@ -54,15 +54,15 @@ for k = 1:obj.numChannels
     timeaxis = dt * (-maxlags:maxlags);
     timeaxis(maxlags+1) = []; 
     
-        %     find R_lambd_f according to formula
+    % find R_lambd_f according to formula
 %     theta = fliplr(obj.NlinKernel.estimation(k).polyfit);
-%     theta = fliplr(theta_ALL{k});
-%     R_lambd_f{k} = theta(1)*theta(1) + 2*theta(1)*theta(2)*E_xk + 2*theta(1)*theta(3)*var_xk...
-%                 + theta(2)*theta(2) .* E_x_ttau+ theta(3)*theta(3)... 
-%                 .* (var_xk.^2 + 2.*E_x_ttau.^2) + 2*theta(2)*theta(3).*var_xk.*E_xk;  
-%     R_lambd_f{k}(maxlags + 1) = [];
-%     timeaxis = dt * (-maxlags:maxlags);
-%     timeaxis(maxlags+1) = [];    
+    theta = fliplr(theta_ALL{k});
+    R_lambd_f{k} = theta(1)*theta(1) + 2*theta(1)*theta(2)*E_xk + 2*theta(1)*theta(3)*var_xk...
+                + theta(2)*theta(2) .* E_x_ttau+ theta(3)*theta(3)... 
+                .* (var_xk.^2 + 2.*E_x_ttau.^2) + 2*theta(2)*theta(3).*var_xk.*E_xk;  
+    R_lambd_f{k}(maxlags + 1) = [];
+    timeaxis = dt * (-maxlags:maxlags);
+    timeaxis(maxlags+1) = [];    
     
 %     % interpolation to mutual sampling rate
 %     sampPoints =  lags .* obj.stimulus.dt;

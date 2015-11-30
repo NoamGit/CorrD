@@ -118,7 +118,7 @@ classdef PointProcessData < PointProcess
         [lambda_corr] = ppcorr(obj, bias, correctR0, method)
         
         %% estimate non linearity
-        obj = nlestimation( obj, varargin );
+        [obj, domain_bin] = nlestimation( obj, varargin );
         
         %% show spike time interval histogram and exponential fit
         showISI( obj, varargin ); 

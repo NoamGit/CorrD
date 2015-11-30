@@ -1,4 +1,4 @@
-function obj = nlestimation( obj,varargin ) 
+function [ obj, domain_bin] = nlestimation( obj,varargin ) 
 % nlestimation() estimates the non linearity out of the spike train. CGP is
 % calculated according to the stimulus and the STA.
 % the STA must be obtained before running this function (calcSTA());
@@ -56,7 +56,11 @@ for k = 1:obj.numChannels
             %         u = obj.CGP{k}/std(obj.CGP{k}); 
 %             time =  (0:obj.stimulus.dt:obj.T-obj.stimulus.dt); % this can
 %             be used for no interp nor resampling nl estimation
-%             CP{k} =  histc(obj.spiketimes{k}, time);            
+%             CP{k} =  histc(obj.spiketimes{k}, time);   
+        else 
+            cgp =  conv( obj.stimulus.Yuncorr, amp * flipud(obj.STA(k).STA), 'full');
+            obj.CGP{k} = cgp(1:end-length(obj.STA(k).STA)+1);
+            u = obj.CGP{k};
         end
         
         % normalize the linear prediction and weighted binning of the functions domain

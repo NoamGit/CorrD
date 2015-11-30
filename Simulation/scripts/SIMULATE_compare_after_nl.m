@@ -10,9 +10,9 @@ noiseMean = 0;
 stim = noiseMean + noiseVar * randn(N,1);
 t_stim = linspace(0,N*dt_stim,N);
 
-c = 6;
-nonLinMethod = 'exp';
-% nonLinMethod = 'poly';
+c = 1;
+% nonLinMethod = 'exp';
+nonLinMethod = 'poly';
 %% create all processes
 syntData = [];
 for n = 1:c % build c processes
@@ -109,14 +109,16 @@ end
     linKernel_orig = cellfun(@(x) amp_stim * x.val, {syntData.linKernel},'UniformOutput', false);
     process = process.CalcSTA(length(linKernel_orig{1}), 0, amp_stim, 'original stimulus'); 
     % normalize STA 
-    sta_norm = cellfun(@(x, y) normalize(x,6).*std(y)+mean(y) ,{process.STA.realSTA},linKernel_orig,'UniformOutput',false);
+    sta_norm = cellfun(@(x, y) normalize(x,6).*std(y)+mean(y) ,{process.STA.STA},linKernel_orig,'UniformOutput',false);
     for k = 1:c
-        process.STA(k).realSTA = sta_norm{k};
+        process.STA(k).STA = sta_norm{k};
     end
     
     % plot
-    plotCompare({process.STA.realSTA},linKernel_orig, t_kernel, c ,'STA of cell ',0,(1:c))
-    legend('STA','Kernel');
+    plotProperties = struct('cellarray2',linKernel_orig','time',t_kernel,'method',...
+    6,'num2disp',c,'title','STA of cell ','xlabel','\tau[sec]',...
+        'legendA','STA','legendB','Kernel');
+    plotCompare( {process.STA.STA}, plotProperties );
     %% check nlestimation
     
     cgp_cellArray = cellfun(@(x) conv( stim,amp_stim * x.model(fliplr(t_kernel)),'full'),{syntData.linKernel},'UniformOutput',false);
@@ -126,10 +128,10 @@ end
     switch nonLinMethod
         case 'poly'
             poly_order = 2;
-            process = process.nlestimation(poly_order, 0, amp_stim,'poly', 'resampled stimulus','Synt Data'); % stimulus has same dt as procees -> resampled
-            nl_domain = cellfun(@(x) downsample(x.domain,5e4), {syntData.nonlinKernel},'UniformOutput', false);
-            nl_image = cellfun(@(y,x) y.model(x), {syntData.nonlinKernel},nl_domain,'UniformOutput', false);
-            fullmodel = @(theta,x)  theta(1)* x.^2 + theta(2) * x + theta(3);
+            [process, nl_domain] = process.nlestimation(poly_order, 0, amp_stim,'poly', 'resampled stimulus','Synt Data'); % stimulus has same dt as procees -> resampled
+%             nl_domain = cellfun(@(x) downsample(x.domain,5e4), {syntData.nonlinKernel},'UniformOutput', false);
+            nl_image = cellfun(@(y,x) y.model(x), {syntData.nonlinKernel},{nl_domain},'UniformOutput', false);
+            fullmodel = @(theta,x)  theta(3)* x.^2 + theta(2) * x + theta(1);
         case 'exp'
             poly_order = 0;
             process = process.nlestimation(poly_order,0, amp_stim,'exp', 'resampled stimulus','Synt Data'); % stimulus has same dt as procees -> resample
@@ -138,9 +140,16 @@ end
             fullmodel = @(theta, x) theta(1) * exp(x.* theta(2));
     end
     % plot
-            nl_est_image = cellfun(@(c,x) fullmodel(c.fitParam,x), {process.NlinKernel.estimation},nl_domain,'UniformOutput', false);
-            plotCompare(nl_image,nl_est_image,nl_domain, c ,'nl of cell ', 6 ,(1:c));
-            legend('est NL','NL');   
+            nl_est_image = cellfun(@(c,x) polyval( fliplr(c.fitParam) ,x), {process.NlinKernel.estimation},{nl_domain},'UniformOutput', false);
+               % plot
+            plotProperties = struct('cellarray2',nl_est_image','time',nl_domain','method',...
+            6,'num2disp',1,'title','nl of cell ','xlabel','domain',...
+                'legendA','est nl','legendB','NL');
+            plotCompare( nl_image, plotProperties );
+                        
+%             nl_est_image = cellfun(@(c,x) fullmodel( c.fitParam ,x), {process.NlinKernel.estimation},nl_domain,'UniformOutput', false);
+%             plotCompare(nl_image,nl_est_image,nl_domain, c ,'nl of cell ', 6 ,(1:c));
+%             legend('est NL','NL');   
     %% try comparing RdN 
     
     flagDoublet = 0; flagCompare = 0;
