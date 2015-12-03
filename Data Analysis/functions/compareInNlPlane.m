@@ -40,7 +40,9 @@ for k = 1:obj.numChannels
     if size(h{k},1) == 1 % if h is not column vect -> transpose
         h{k} = h{k}';
     end
-    E_x_ttau = conv( conv( R_s,flipud(h{k}),'same' ), h{k},'same' );
+    kernHalfSize = round(length( h{k} )/2);
+    conv_full = conv( flipud(h{k}),R_s,'full' );
+    E_x_ttau = conv( conv_full(kernHalfSize:(end-kernHalfSize)) , h{k},'same' );
     var_xk_est = E_x_ttau(obj.maxlags/resampFactor+1) - E_xk_est.^2; 
     E_x_ttau = xcorr(conv( R_s,flipud(h{k}),'same'),obj.maxlags/resampFactor,'unbiased' );
     

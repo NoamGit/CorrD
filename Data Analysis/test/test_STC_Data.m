@@ -3,7 +3,8 @@
 %% Load data
 
 cpxproc = process;
-indx = 2;
+indx = 3; % good indx
+% indx = 2; % not good indx
 stim = cpxproc.stimulus.Yuncorr;
 dt = cpxproc.stimulus.dt;
 CP = cpxproc.spiketimes{indx};
@@ -34,7 +35,7 @@ legend('sta1', 'sta', 'w sta','Location','northwest');
 % legend('mu', 'sta1', 'sta', 'w sta','Location','northwest');
 
 figure(3);
-k = 1;
+k = 34;
 plot(normalize(sta,1),'-or')
 hold on;
 plot(normalize( e_vec(:,k),1),'--k')
@@ -51,11 +52,13 @@ title('STC Analysis');
 fig = figure(5);
 JointFilterResponseProb( sta, e_vec(:,end), 39, X ,fig );
 %% Significance test
-
-numSimulation = 1e3;
-alpha = .95;
-stc_significanceTest( rawStimuli , CP , var_prec, alpha, numSimulation );
-
+tic;
+% numSimulation = 1e3;
+numSimulation = 500;
+alpha = .05;
+eigen_struct = struct('eigVec',e_vec,'eigVal',e_val,'opVec',sta,'eigInd',(1:numel(e_val)));
+stc_significanceTest( rawStimuli , CP , alpha, numSimulation, eigen_struct );
+toc
 %% results
 % it seems like the stimulus ensemble subspace covariance matrix has a
 % unique pattern where the last eigen vector always explaines less variance
